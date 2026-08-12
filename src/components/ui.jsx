@@ -18,7 +18,7 @@ export function StatusBar() {
 
 /* ---------------- Bottom Nav ---------------- */
 const TABS = [
-  { id: 'home', label: '星球', Icon: Sparkles },
+  { id: 'home', label: '星海', Icon: Sparkles },
   { id: 'square', label: '广场', Icon: LayoutGrid },
   { id: 'messages', label: '消息', Icon: MessageCircle },
   { id: 'me', label: '我的', Icon: User },

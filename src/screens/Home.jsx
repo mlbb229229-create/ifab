@@ -26,90 +26,57 @@ const STARS = [
   { x: 350, y: 160, s: 2, d: 0.3 }, { x: 120, y: 300, s: 2, d: 1.5 }, { x: 250, y: 320, s: 1.5, d: 2.6 },
 ]
 
-/* fibonacci sphere lattice（避开南北极点，防止标签停在旋转轴上） */
-function spherePoints(n) {
+/* 2D 星尘锚点：黄金角螺旋 + 抖动，避免标签重叠 */
+function starLayout(n) {
   const pts = []
   const ga = Math.PI * (3 - Math.sqrt(5))
+  const cx = 160, cy = 150
   for (let i = 0; i < n; i++) {
-    const y = 1 - ((i + 0.5) / n) * 2
-    const r = Math.sqrt(Math.max(0, 1 - y * y))
+    const r = 14 + (i / n) * 138
     const th = ga * i
-    pts.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r })
+    pts.push({
+      x: cx + Math.cos(th) * r + ((i * 5) % 11 - 5) * 7,
+      y: cy + Math.sin(th) * r + ((i * 7) % 13 - 6) * 5,
+    })
   }
   return pts
 }
 
-const R = 136 // globe radius
-const PERSP = 640
-const BASE_TILT = -14 // degrees
-const BASE_SPEED = 10 // deg/s auto-rotate
-
-function Globe({ myIf, onTag }) {
+/* ---------- 2D 星尘标签场（可拖拽甩动 + 点选） ---------- */
+function StarField({ myIf, selected, onToggle }) {
   const tags = useMemo(() => {
     const list = myIf
       ? [{ label: myIf.ifText.length > 8 ? myIf.ifText.slice(0, 8) + '…' : myIf.ifText, gold: true },
          ...TAG_LABELS.map((t, i) => ({ label: t, dot: DOT_COLORS[i % DOT_COLORS.length] }))]
       : TAG_LABELS.map((t, i) => ({ label: t, dot: DOT_COLORS[i % DOT_COLORS.length] }))
-    const pts = spherePoints(list.length)
-    return list.map((t, i) => ({ ...t, p: pts[i] }))
+    const pts = starLayout(list.length)
+    return list.map((t, i) => ({ ...t, a: pts[i] }))
   }, [myIf])
 
   const tagRefs = useRef([])
-  const ringBackRef = useRef(null)
-  const ringFrontRef = useRef(null)
-  const S = useRef({
-    ry: 40, rx: BASE_TILT,
-    vy: BASE_SPEED, vx: 0,
-    dragging: false, lastX: 0, lastY: 0, lastT: 0,
-  })
+  const S = useRef({ ox: 0, oy: 0, vx: 0, vy: 0, dragging: false, lastX: 0, lastY: 0, lastT: 0 })
+
+  const apply = () => {
+    const s = S.current
+    tagRefs.current.forEach((el, i) => {
+      if (!el || !tags[i]) return
+      el.style.transform = `translate(-50%,-50%) translate(${s.ox + tags[i].a.x}px, ${s.oy + tags[i].a.y}px)`
+    })
+  }
 
   useEffect(() => {
+    apply()
     let raf
-    let last = performance.now()
-    const loop = (now) => {
-      const dt = Math.min(0.05, (now - last) / 1000)
-      last = now
+    const loop = () => {
       const s = S.current
-
       if (!s.dragging) {
-        // inertia decay → resume auto rotate
-        s.vy += (BASE_SPEED - s.vy) * Math.min(1, dt * 1.6)
-        s.rx += (BASE_TILT - s.rx) * Math.min(1, dt * 1.4)
-        s.ry += s.vy * dt
+        s.ox += s.vx
+        s.oy += s.vy
+        s.vx *= 0.9
+        s.vy *= 0.9
+        if (Math.abs(s.vx) < 0.06 && Math.abs(s.vy) < 0.06) s.vx = s.vy = 0
+        apply()
       }
-
-      const ry = (s.ry * Math.PI) / 180
-      const rx = (s.rx * Math.PI) / 180
-      const cosY = Math.cos(ry), sinY = Math.sin(ry)
-      const cosX = Math.cos(rx), sinX = Math.sin(rx)
-
-      tagRefs.current.forEach((el, i) => {
-        if (!el) return
-        const tag = tags[i]
-        if (!tag) return
-        const { x, y, z } = tag.p
-        // rotate around Y axis, then X axis
-        const x1 = x * cosY + z * sinY
-        const z1 = -x * sinY + z * cosY
-        const y2 = y * cosX - z1 * sinX
-        const z2 = y * sinX + z1 * cosX
-        const px = x1 * R
-        const py = y2 * R
-        const pz = z2 * R // >0 toward viewer
-        const sc = PERSP / (PERSP - pz * 0.85)
-        // occluded by planet body?
-        const behind = pz < -18 && Math.hypot(px, py) < 90
-        el.style.transform = `translate(-50%,-50%) translate(${px}px, ${py}px) scale(${sc})`
-        el.style.zIndex = behind ? 1 : Math.round(100 + pz)
-        el.style.opacity = behind ? 0 : 0.45 + 0.55 * ((pz / R + 1) / 2)
-        el.style.pointerEvents = behind ? 'none' : 'auto'
-      })
-
-      // ring flatten follows drag tilt
-      const f = Math.max(0.22, Math.min(0.6, 0.34 + ((s.rx - BASE_TILT) / 60) * 0.5))
-      const ringTf = `translate(-50%,-50%) scaleY(${f})`
-      if (ringBackRef.current) ringBackRef.current.style.transform = ringTf
-      if (ringFrontRef.current) ringFrontRef.current.style.transform = ringTf
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -122,6 +89,7 @@ function Globe({ myIf, onTag }) {
     s.lastX = e.clientX
     s.lastY = e.clientY
     s.lastT = performance.now()
+    s.vx = s.vy = 0
     e.currentTarget.setPointerCapture?.(e.pointerId)
   }
   const onMove = (e) => {
@@ -131,84 +99,63 @@ function Globe({ myIf, onTag }) {
     const dx = e.clientX - s.lastX
     const dy = e.clientY - s.lastY
     const dtm = Math.max(1, now - s.lastT) / 1000
-    s.ry += dx * 0.35
-    s.rx = Math.max(-55, Math.min(25, s.rx - dy * 0.25))
-    s.vy = Math.max(-160, Math.min(160, (dx * 0.35) / dtm))
+    s.ox = Math.max(-120, Math.min(120, s.ox + dx))
+    s.oy = Math.max(-80, Math.min(80, s.oy + dy))
+    s.vx = Math.max(-12, Math.min(12, dx / dtm))
+    s.vy = Math.max(-10, Math.min(10, dy / dtm))
     s.lastX = e.clientX
     s.lastY = e.clientY
     s.lastT = now
+    apply()
   }
   const onUp = () => { S.current.dragging = false }
 
   return (
-    <div
-      className="globe-scene"
+    <div className="relative w-full h-[320px] overflow-hidden rounded-[20px] border border-white/10
+      bg-[radial-gradient(120%_90%_at_50%_0%,#1b1f2a_0%,#13151c_55%,#0e1016_100%)] select-none"
+      style={{ touchAction: 'none' }}
       onPointerDown={onDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
       onPointerLeave={onUp}
     >
+      {/* 微光星星 */}
       {STARS.map((s, i) => (
         <div key={i} className="star" style={{ left: s.x, top: s.y, width: s.s, height: s.s, animationDelay: `${s.d}s` }} />
       ))}
+      {/* 中心微光 */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(212,60,51,0.12), transparent 65%)' }} />
 
-      {/* glow */}
-      <div className="absolute left-1/2 top-[47%] -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none z-[5]"
-        style={{ background: 'radial-gradient(circle, rgba(239,68,68,0.15), rgba(251,113,133,0.07) 45%, transparent 70%)' }} />
+      {/* 星尘标签 */}
+      {tags.map((t, i) => {
+        const on = selected.includes(t.label)
+        return (
+          <div key={t.label} ref={(el) => (tagRefs.current[i] = el)}
+            className="absolute left-0 top-0 will-change-transform" style={{ left: 0, top: 0 }}>
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onToggle(t.label)}
+              className={`pressable whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-200
+                ${on
+                  ? 'bg-[#D43C33] border border-[#ff6b62] text-white shadow-[0_0_16px_rgba(212,60,51,0.55)]'
+                  : t.gold
+                    ? 'bg-[rgba(58,36,6,0.55)] border border-[#e8bf3a]/50 text-[#ffd76a] shadow-[0_0_10px_rgba(232,191,58,0.2)]'
+                    : 'bg-[rgba(20,24,32,0.7)] border border-white/20 text-white/85 shadow-[0_0_8px_rgba(255,255,255,0.06)]'}`}
+            >
+              <span className={`tag-dot ${t.gold ? 'gold' : ''} ${t.dot || ''}`} />
+              {t.label}
+              {t.gold && <span className="text-[7px] text-white/50 font-normal">(我)</span>}
+            </button>
+          </div>
+        )
+      })}
 
-      {/* back half of ring (behind planet) */}
-      <svg ref={ringBackRef} className="absolute left-1/2 top-[47%] z-[6] pointer-events-none overflow-visible"
-        width="380" height="380" style={{ transform: 'translate(-50%,-50%) scaleY(0.34)' }}
-        viewBox="0 0 380 380" fill="none">
-        <g transform="translate(190,190)">
-          <path d="M -168 0 A 168 168 0 0 1 168 0" stroke="rgba(255,158,158,0.28)" strokeWidth="1.2" strokeDasharray="3 7">
-            <animate attributeName="stroke-dashoffset" from="0" to="-40" dur="2.2s" repeatCount="indefinite" />
-          </path>
-          <path d="M -146 0 A 146 146 0 0 1 146 0" stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
-        </g>
-      </svg>
-
-      {/* planet */}
-      <div className="planet-body z-[20]">
-        <div className="planet-bands" />
-        <div className="planet-spin" />
-        <div className="planet-rim" />
+      {/* 提示 */}
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-2 text-center pointer-events-none">
+        <span className="text-white/30 text-[9px] font-medium tracking-wide">按住拖拽 · 点选星辰</span>
       </div>
-
-      {/* front half of ring (above planet) */}
-      <svg ref={ringFrontRef} className="absolute left-1/2 top-[47%] z-[25] pointer-events-none overflow-visible"
-        width="380" height="380" style={{ transform: 'translate(-50%,-50%) scaleY(0.34)' }}
-        viewBox="0 0 380 380" fill="none">
-        <g transform="translate(190,190)">
-          <path d="M -168 0 A 168 168 0 0 0 168 0" stroke="rgba(255,170,170,0.5)" strokeWidth="1.4" strokeDasharray="3 7">
-            <animate attributeName="stroke-dashoffset" from="0" to="-40" dur="2.2s" repeatCount="indefinite" />
-          </path>
-          <path d="M -146 0 A 146 146 0 0 0 146 0" stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
-          {/* satellite dot riding front ring */}
-          <circle r="4" fill="#ff6b62">
-            <animateMotion dur="9s" repeatCount="indefinite"
-              path="M -168 0 A 168 168 0 0 0 168 0 A 168 168 0 0 0 -168 0" />
-          </circle>
-          <circle r="2.5" fill="rgba(255,255,255,0.8)">
-            <animateMotion dur="13s" begin="-6s" repeatCount="indefinite"
-              path="M -146 0 A 146 146 0 0 0 146 0 A 146 146 0 0 0 -146 0" />
-          </circle>
-        </g>
-      </svg>
-
-      {/* orbiting tags on the 3D sphere */}
-      {tags.map((t, i) => (
-        <div key={t.label} ref={(el) => (tagRefs.current[i] = el)} className="globe-tag">
-          <button className={`pill ${t.gold ? 'gold' : ''}`}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => onTag(t.label)}>
-            <span className={`tag-dot ${t.gold ? 'gold' : ''} ${t.dot || ''}`} />
-            {t.label}
-            {t.gold && <span className="text-[7px] text-white/50 font-normal">(我)</span>}
-          </button>
-        </div>
-      ))}
     </div>
   )
 }
@@ -249,6 +196,7 @@ export default function Home({ go, store }) {
   const [tab, setTab] = useState('#消费成长')
   const [toast, setToast] = useState('')
   const [matching, setMatching] = useState(false)
+  const [selTags, setSelTags] = useState([])
   const panel = PANELS[TAB_PANEL[tab]]
 
   const ping = (msg) => {
@@ -256,11 +204,17 @@ export default function Home({ go, store }) {
     clearTimeout(ping.t)
     ping.t = setTimeout(() => setToast(''), 1800)
   }
+  const toggleTag = (label) => {
+    setSelTags((prev) => (prev.includes(label) ? prev.filter((t) => t !== label) : [...prev, label]))
+  }
   const joinTopic = (label) => {
     ping(`已加入「${label}」话题`)
     setTimeout(() => go('group-chat', { title: label }), 650)
   }
-  const startMatch = () => setMatching(true)
+  const startMatch = () => {
+    if (!selTags.length) { ping('先点亮几颗星辰吧 ✦'); return }
+    setMatching(true)
+  }
   const matchDone = (u) => {
     setMatching(false)
     go('user-chat', { name: u.name, av: u.av, fit: u.fit })
@@ -272,11 +226,39 @@ export default function Home({ go, store }) {
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
         {/* header */}
         <div className="flex items-center justify-between px-5 pt-1">
-          <h1 className="text-white text-[20px] font-black">星球</h1>
+          <h1 className="text-white text-[20px] font-black">星海</h1>
         </div>
 
-        {/* 3D globe — drag to rotate */}
-        <Globe myIf={store.data.firstIf} onTag={joinTopic} />
+        {/* 2D 星尘标签场 — drag to browse, tap to select */}
+        <StarField myIf={store.data.firstIf} selected={selTags} onToggle={toggleTag} />
+
+        {/* 已选星辰 + 去匹配 */}
+        {selTags.length > 0 && (
+          <div className="mx-4 mt-3 rounded-[16px] bg-[#171a22] border border-[#D43C33]/40 p-3">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <span className="flex-none text-white/40 text-[10px] font-bold">已选</span>
+              {selTags.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => toggleTag(t)}
+                  className="pressable flex-none flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#D43C33] border border-[#ff6b62] text-white text-[10px] font-semibold"
+                >
+                  {t}
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 6l12 12M18 6L6 18" stroke="rgba(255,255,255,0.8)" strokeWidth="2.4" strokeLinecap="round" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={startMatch}
+              className="pressable mt-2.5 w-full h-9 rounded-full bg-[linear-gradient(95deg,#FF4B4B,#C40000)] text-white text-[12px] font-black
+                shadow-[0_6px_20px_rgba(255,60,60,0.4)]"
+            >
+              基于 {selTags.length} 个话题去匹配
+            </button>
+          </div>
+        )}
 
         {/* match cards */}
         <div className="flex gap-3 px-4 mt-4">
