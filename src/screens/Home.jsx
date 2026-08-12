@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin } from 'lucide-react'
+import { MapPin, Sparkles } from 'lucide-react'
 import { StatusBar, BottomNav } from '../components/ui.jsx'
 import MatchOverlay from '../components/MatchOverlay.jsx'
 import { IMG, Avatar } from '../assets.jsx'
@@ -26,31 +26,63 @@ const STARS = [
   { x: 350, y: 160, s: 2, d: 0.3 }, { x: 120, y: 300, s: 2, d: 1.5 }, { x: 250, y: 320, s: 1.5, d: 2.6 },
 ]
 
-/* 2D 星尘锚点：黄金角螺旋 + 抖动，避免标签重叠 */
-function starLayout(n) {
-  const pts = []
-  const ga = Math.PI * (3 - Math.sqrt(5))
-  const cx = 160, cy = 150
-  for (let i = 0; i < n; i++) {
-    const r = 14 + (i / n) * 138
-    const th = ga * i
-    pts.push({
-      x: cx + Math.cos(th) * r + ((i * 5) % 11 - 5) * 7,
-      y: cy + Math.sin(th) * r + ((i * 7) % 13 - 6) * 5,
-    })
+/* 关键词 → 相关度权重（与 IF 引力场共用） */
+const REL_KEYWORDS = [
+  { words: ['钱', '存', '月光', '工资', '买房', '理财', '副业', '收入', '消费'], w: 4 },
+  { words: ['早起', '早睡', '睡', '精力', '健身', '运动', '跑步', '减脂', '自律', '作息'], w: 4 },
+  { words: ['工作', '升职', '加薪', '转行', '跳槽', '汇报', '面试', '考公', '考研', 'AI', '效率'], w: 4 },
+  { words: ['焦虑', '情绪', '内耗', '分手', '自愈', '烦恼', '拒绝', '安全感', '冥想', '复盘'], w: 3 },
+  { words: ['读书', '学习', '英语', '写作', '摄影', '吉他', '学'], w: 2 },
+  { words: ['旅行', '出逃', '放松', '旅游', '游民'], w: 2 },
+]
+
+/* 计算标签与我的 IF 的相关度 0~1 */
+function relevance(label, ifText = '', want = '') {
+  const text = `${ifText}${want}`
+  let score = 0
+  for (const k of REL_KEYWORDS) {
+    if (k.words.some((w) => label.includes(w))) {
+      score += k.w * (text ? (text.includes(label[0]) || k.words.some((w) => text.includes(w)) ? 1 : 0.45) : 1)
+    }
   }
+  if (text.includes(label)) score = 4
+  return Math.min(1, 0.15 + score / 4.6)
+}
+
+/* IF 引力场锚点：相关度越高的标签越靠近中心、越大 */
+function starLayout(tags) {
+  const cx = 160, cy = 150
+  const ga = Math.PI * (3 - Math.sqrt(5))
+  const pts = []
+  // 按相关度从高到低排序 → 内圈
+  const sorted = tags
+    .map((t, i) => ({ i, r: t.rel }))
+    .sort((a, b) => b.r - a.r)
+  sorted.forEach((item, rank) => {
+    const t = item.r // 0~1
+    const r = 18 + (1 - t) * 128
+    const th = ga * rank
+    const jx = ((rank * 5) % 11 - 5) * 6
+    const jy = ((rank * 7) % 13 - 6) * 5
+    pts[item.i] = {
+      x: cx + Math.cos(th) * r + jx,
+      y: cy + Math.sin(th) * r * 0.92 + jy,
+    }
+  })
   return pts
 }
 
-/* ---------- 2D 星尘标签场（可拖拽甩动 + 点选） ---------- */
+/* ---------- 2D IF 引力标签场（向心分布 + 拖拽 + 点选） ---------- */
 function StarField({ myIf, selected, onToggle }) {
   const tags = useMemo(() => {
+    const ifText = myIf?.ifText || ''
+    const want = myIf?.want || ''
     const list = myIf
-      ? [{ label: myIf.ifText.length > 8 ? myIf.ifText.slice(0, 8) + '…' : myIf.ifText, gold: true },
-         ...TAG_LABELS.map((t, i) => ({ label: t, dot: DOT_COLORS[i % DOT_COLORS.length] }))]
-      : TAG_LABELS.map((t, i) => ({ label: t, dot: DOT_COLORS[i % DOT_COLORS.length] }))
-    const pts = starLayout(list.length)
-    return list.map((t, i) => ({ ...t, a: pts[i] }))
+      ? [{ label: ifText.length > 8 ? ifText.slice(0, 8) + '…' : ifText, gold: true, rel: 1 },
+         ...TAG_LABELS.map((t) => ({ label: t, rel: relevance(t, ifText, want) }))]
+      : TAG_LABELS.map((t) => ({ label: t, rel: relevance(t, '', '') }))
+    const pts = starLayout(list)
+    return list.map((t, i) => ({ ...t, a: pts[i], dot: DOT_COLORS[i % DOT_COLORS.length] }))
   }, [myIf])
 
   const tagRefs = useRef([])
@@ -124,24 +156,30 @@ function StarField({ myIf, selected, onToggle }) {
       {STARS.map((s, i) => (
         <div key={i} className="star" style={{ left: s.x, top: s.y, width: s.s, height: s.s, animationDelay: `${s.d}s` }} />
       ))}
-      {/* 中心微光 */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(212,60,51,0.12), transparent 65%)' }} />
+      {/* 中心引力场光晕 */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(212,60,51,0.16), rgba(212,60,51,0.05) 45%, transparent 70%)' }} />
+      {/* 同心参考环 */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[150px] h-[150px] rounded-full border border-white/[0.05] pointer-events-none" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] rounded-full border border-white/[0.04] pointer-events-none" />
 
-      {/* 星尘标签 */}
+      {/* 引力标签：相关度 → 大小/亮度/透明度 */}
       {tags.map((t, i) => {
         const on = selected.includes(t.label)
+        const size = Math.round(9 + t.rel * 3) // 9~12px
+        const dim = 0.38 + t.rel * 0.62 // 亮度
         return (
           <div key={t.label} ref={(el) => (tagRefs.current[i] = el)}
             className="absolute left-0 top-0 will-change-transform" style={{ left: 0, top: 0 }}>
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => onToggle(t.label)}
-              className={`pressable whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-200
+              style={{ opacity: on ? 1 : dim }}
+              className={`pressable whitespace-nowrap px-2.5 py-1 rounded-full text-[${size}px] font-semibold transition-all duration-200
                 ${on
                   ? 'bg-[#D43C33] border border-[#ff6b62] text-white shadow-[0_0_16px_rgba(212,60,51,0.55)]'
                   : t.gold
-                    ? 'bg-[rgba(58,36,6,0.55)] border border-[#e8bf3a]/50 text-[#ffd76a] shadow-[0_0_10px_rgba(232,191,58,0.2)]'
+                    ? 'bg-[rgba(58,36,6,0.55)] border border-[#e8bf3a]/50 text-[#ffd76a] shadow-[0_0_12px_rgba(232,191,58,0.25)]'
                     : 'bg-[rgba(20,24,32,0.7)] border border-white/20 text-white/85 shadow-[0_0_8px_rgba(255,255,255,0.06)]'}`}
             >
               <span className={`tag-dot ${t.gold ? 'gold' : ''} ${t.dot || ''}`} />
@@ -152,9 +190,20 @@ function StarField({ myIf, selected, onToggle }) {
         )
       })}
 
+      {/* 中心 IF 金星（覆盖在最上层） */}
+      {myIf && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 flex flex-col items-center gap-1.5">
+          <div className="w-12 h-12 rounded-full bg-[#D43C33] border-2 border-[#ff6b62]
+            shadow-[0_0_24px_rgba(212,60,51,0.6)] flex items-center justify-center">
+            <Sparkles size={20} color="#fff" />
+          </div>
+          <span className="text-[#ff8a80] text-[9px] font-black tracking-widest">我的 IF</span>
+        </div>
+      )}
+
       {/* 提示 */}
       <div className="absolute left-1/2 -translate-x-1/2 bottom-2 text-center pointer-events-none">
-        <span className="text-white/30 text-[9px] font-medium tracking-wide">按住拖拽 · 点选星辰</span>
+        <span className="text-white/30 text-[9px] font-medium tracking-wide">越靠近 IF 越相关 · 拖拽浏览 · 点选</span>
       </div>
     </div>
   )
