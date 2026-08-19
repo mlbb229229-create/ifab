@@ -20,14 +20,14 @@
 
 | | |
 |---|---|
-| **📱 [16 HTML Prototypes](https://mlbb229229-create.github.io/ifab/prototypes/)** | Hand-coded standalone HTML/CSS/JS screens — click any card to play with it. **This is the vibe-coding showcase.** |
+| **📱 [16 HTML Prototypes](https://mlbb229229-create.github.io/ifab/prototypes/)** | Standalone HTML/CSS/JS screens, no build step — click any card to try it. |
 | **⚛️ [React App Demo](https://mlbb229229-create.github.io/ifab/)** | The productized version: full navigation, global state, animations, matching flow. |
 
 ---
 
-## 1. HTML Prototypes — Built at Conversation Speed
+## 1. HTML Prototypes
 
-This whole UI started as Pencil design specs and was coded into **16 clickable, standalone HTML screens** in a single vibe-coding session — no build step, open the file and it runs. Every screen has working micro-interactions: phone login, verification-code flow, persona creation, a star-field home, chat screens, an intimacy meter, a decision assistant and more.
+This UI started as Pencil design specs and was coded into **16 clickable, standalone HTML screens** — no build step, open the file and it runs. Each screen has working micro-interactions: phone login, verification-code flow, persona creation, a star-field home, chat screens, an intimacy meter, a decision assistant and more.
 
 The gallery page ([`prototypes/index.html`](prototypes/index.html)) live-previews all 16 screens in phone frames:
 
@@ -46,13 +46,11 @@ The gallery page ([`prototypes/index.html`](prototypes/index.html)) live-preview
 
 </div>
 
-> **Vibe coding, defined:** AI-assisted development where design intent turns into working UI in conversation, not in sprints. Design spec → clickable prototype → production app, all in the same day.
-
 ---
 
-## 2. From Prototype to Product — The React App
+## 2. The React Version
 
-The prototypes were productized into a full **React 18 + Vite 6** mobile-first app with real state, routing, and animation — not a mock.
+The same screens were rebuilt as a **React 18 + Vite 6** mobile-first app with shared state, history-stack navigation, and animations.
 
 <div align="center">
 <img src="docs/screenshots/react-home.png" width="220" alt="React app home — IF gravity field" />
@@ -60,14 +58,14 @@ The prototypes were productized into a full **React 18 + Vite 6** mobile-first a
 
 ### Core Features
 
-- **IF Gravity Field (星海)** — the home screen. Your "what-if" tags orbit the center "IF" star; tag distance encodes relevance, with an inertia-based drag, multi-select, and a live matching CTA. A custom **relevance scoring engine** ranks tags by keyword groups.
+- **IF Gravity Field (星海)** — the home screen. Your "what-if" tags orbit the center "IF" star; tag distance encodes relevance, with an inertia-based drag, multi-select, and a live matching CTA. Tag distance is computed from a small keyword-relevance score.
 - **IF Goal Management** — create, track, and complete "IF" goals with progress sliders, completion states, and auto-suggested group chats per topic.
 - **Square (广场)** — a feed with Recommended / Following / Nearby tabs, post composer with multi-image picker (up to 9), geo-tags, and post detail with comments.
 - **Matching Overlay** — a full-screen radar-scan → particle-burst match animation with a compatibility score.
 - **Messaging** — parallel-persona chat, group chat, and one-on-one chat, with a tag-filter drawer.
 - **Intimacy System** — a rising intimacy meter unlocked through tasks, feeding back into the match experience.
 - **Decision Assistant** — your second persona helps you reason through real decisions.
-- **History-stack navigation** — push/pop routing with `framer-motion` transitions; all `back` buttons return to the true previous screen.
+- **History-stack navigation** — push/pop navigation with `framer-motion` transitions; all `back` buttons return to the previous screen.
 
 ### Tech Stack
 
