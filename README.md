@@ -21,7 +21,7 @@
 | | |
 |---|---|
 | **📱 [16 HTML Prototypes](https://mlbb229229-create.github.io/ifab/prototypes/)** | Standalone HTML/CSS/JS screens, no build step — click any card to try it. |
-| **⚛️ [React App Demo](https://mlbb229229-create.github.io/ifab/)** | The productized version: full navigation, global state, animations, matching flow. |
+| **⚛️ [React App Demo](https://mlbb229229-create.github.io/ifab/)** | The same screens in React: shared state, history-stack navigation, animations, matching flow. |
 
 ---
 
