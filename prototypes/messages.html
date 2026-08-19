@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>消息 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">15 / 16</span>
+  <span class="crumb">消息</span>
+  <span class="sp"></span>
+  <a href="persona-chat.html">&#8592; 上一页</a>
+  <a href="messages-filter.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:830px"><div data-node="ucIUL" data-name="消息" style="box-sizing: border-box; position: relative;width: 375px;height: 830px;display: flex; flex-direction: column;gap: 12px;padding: 0px 12px 12px 12px;background-color: #141416;overflow: hidden;"><div data-node="BKm28" data-name="status" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="AuV0f" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="YcJdh" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="u1tGP" data-name="cell" data-icon="signal" class="icon-signal" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="wnfjK" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<i data-node="k3d1zd" data-name="wifi" data-icon="wifi" class="icon-wifi" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<i data-node="oDWeK" data-name="batt" data-icon="battery-full" class="icon-battery-full" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="ZMO3T" data-name="Header" style="box-sizing: border-box; position: relative;position: absolute; left: 12px; top: 32px;width: 351px;height: 56px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 10px 4px;"><div data-node="zbE6H" data-name="Title" data-text="消息" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 18px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">消息</div>
+<div data-node="xWo0U" data-name="Actions" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><i data-node="Bz4OG" data-name="Search" data-icon="search" class="icon-search" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #AEB5C2; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="Fon0A" data-name="List" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 12px;padding: 108px 0px 0px 0px;"><div data-node="q8ovY" data-name="Filters" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="WxFeO" data-name="left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="ccwyx" style="box-sizing: border-box; position: relative;height: 23px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 6px 12px;box-shadow: inset 0 0 0 1px rgba(212,60,51,1);border-radius: 999px;"><div data-node="D26VPf" data-text="全部" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">全部</div></div>
+<div data-node="iyXLc" style="box-sizing: border-box; position: relative;height: 23px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 6px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);border-radius: 999px;"><div data-node="dFUPX" data-text="未读" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">未读</div></div>
+<div data-node="nKOo3" style="box-sizing: border-box; position: relative;height: 23px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 6px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);border-radius: 999px;"><div data-node="Zz2Ei" data-text="群聊" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">群聊</div></div></div>
+<div data-node="JFZds" data-name="right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="nLOVo" data-text="标签筛选" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">标签筛选</div></div></div>
+<div data-node="wUW5P" data-name="Recents" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 10px;"><div data-node="aaQ3v" data-text="最近联系人" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">最近联系人</div>
+<div data-node="vNB1p" data-name="Row" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;overflow: hidden;"><div data-node="w6zIv9" data-name="a1" style="box-sizing: border-box; position: relative;width: 62px;display: flex; flex-direction: column;gap: 6px;align-items: center;"><div data-node="U2337X" data-name="e1" style="box-sizing: border-box; position: relative;width: 44px;height: 44px;border-radius: 50%;background: url(assets/unsplash-1546961329-78bef0414d7c.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.302);"></div>
+<div data-node="H3TIvi" data-text="阿楠" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">阿楠</div>
+<div data-node="Bzdr1" data-name="Unread Dot" style="box-sizing: border-box; position: relative;position: absolute; left: 43px; top: 5px;width: 7px;height: 7px;border-radius: 50%;background-color: #1c212a;box-shadow: 0px 1px 2px rgba(0,0,0,0.133);"></div></div>
+<div data-node="Xt5nY" data-name="a2" style="box-sizing: border-box; position: relative;width: 62px;display: flex; flex-direction: column;gap: 6px;align-items: center;"><div data-node="I5dX0y" data-name="e2" style="box-sizing: border-box; position: relative;width: 44px;height: 44px;border-radius: 50%;background: url(assets/unsplash-1617386124435-9eb3935b1e11.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.302);"></div>
+<div data-node="wUkcW" data-text="米粒" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">米粒</div>
+<div data-node="yMYM8" data-name="Unread Dot" style="box-sizing: border-box; position: relative;position: absolute; left: 45px; top: 5px;width: 7px;height: 7px;border-radius: 50%;background-color: #1c212a;box-shadow: 0px 1px 2px rgba(0,0,0,0.133);"></div></div>
+<div data-node="Tcx53" data-name="a3" style="box-sizing: border-box; position: relative;width: 62px;display: flex; flex-direction: column;gap: 6px;align-items: center;"><div data-node="jvKWB" data-name="e3" style="box-sizing: border-box; position: relative;width: 44px;height: 44px;border-radius: 50%;background: url(assets/unsplash-1551734465-bf8cc92570f5.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.302);"></div>
+<div data-node="d58TDL" data-text="小鹿" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">小鹿</div></div>
+<div data-node="xExdk" data-name="a4" style="box-sizing: border-box; position: relative;width: 62px;display: flex; flex-direction: column;gap: 6px;align-items: center;"><div data-node="GAsSC" data-name="e4" style="box-sizing: border-box; position: relative;width: 44px;height: 44px;border-radius: 50%;background: url(assets/unsplash-1653071163478-177aa4035184.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.302);"></div>
+<div data-node="YjvAV" data-text="Jason" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">Jason</div></div>
+<div data-node="oDisw" data-name="a5" style="box-sizing: border-box; position: relative;width: 62px;display: flex; flex-direction: column;gap: 6px;align-items: center;"><div data-node="Dljnh" style="box-sizing: border-box; position: relative;width: 44px;height: 44px;border-radius: 50%;background-color: rgba(255,255,255,0.102);box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.302);"></div>
+<div data-node="Wzede" data-name="moreDots" data-text="..." style="box-sizing: border-box; position: relative;position: absolute; left: 18.46px; top: 7.46px;width: 26px;height: 26px;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1;text-align: center;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;overflow: hidden;display: flex; flex-direction: column; justify-content: center;">...</div>
+<div data-node="H2Q0G" data-text="更多" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">更多</div></div></div></div>
+<div data-node="H6C99" data-name="Pinned Label" data-text="置顶" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">置顶</div>
+<div data-node="haLVc" data-name="Pinned · 第二人格" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="wvD04" data-name="Left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="C0L7N" data-name="Avatar" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;border-radius: 50%;background: url(assets/generated-1777201503182.png) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;"></div>
+<div data-node="n9CAR" data-name="Text" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 2px;"><div data-node="AI5IV" data-name="pt" data-text="第二人格 · 置顶" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;">第二人格 · 置顶</div>
+<div data-node="R3lDUm" data-name="pp" data-text="我帮你把今天的情绪复盘一下。" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">我帮你把今天的情绪复盘一下。</div></div></div>
+<div data-node="VhluW" data-name="Right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 6px;align-items: flex-end;"><div data-node="RdaY8" data-name="time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">16:36</div>
+<div data-node="A4lsnR" data-name="Unread" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;box-shadow: 0px 3px 8px rgba(127,29,29,0.333), inset 0 0 0 0.6px rgba(255,255,255,0.302);background: linear-gradient(202deg, rgba(122,16,34,0.949) 0%, rgba(159,18,57,0.957) 56%, rgba(91,27,66,0.949) 100%);border-radius: 10px;"><div data-node="dAG8L" data-text="2" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">2</div></div></div></div>
+<div data-node="XtR1c" data-name="Section" data-text="消息" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">消息</div>
+<div data-node="KCbAT" data-name="好友申请" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="UGe8I" data-name="Left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="XKcDT" data-name="Icon" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.251);background: linear-gradient(225deg, rgba(74,85,100,0.941) 0%, rgba(56,66,81,0.957) 100%);border-radius: 10px;"><i data-node="DFN07" data-icon="user-plus" class="icon-user-plus" style="box-sizing: border-box; position: relative;position: absolute; left: 8px; top: 8px;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #2E3540; font-size: 18px; line-height: 1; flex: none;"></i></div>
+<div data-node="EXgMW" data-name="Text" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 2px;"><div data-node="a8Xq0b" data-text="好友申请" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">好友申请</div>
+<div data-node="v4Ao7" data-text="3 条新申请 · 1 条待你通过" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">3 条新申请 · 1 条待你通过</div></div></div>
+<div data-node="C1Y9Wv" data-name="Right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><div data-node="Z41lc" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;box-shadow: 0px 3px 9px rgba(96,165,250,0.384), inset 0 0 0 0.6px rgba(255,255,255,0.322);background: linear-gradient(202deg, rgba(42,79,125,0.949) 0%, rgba(43,99,144,0.957) 56%, rgba(42,84,126,0.949) 100%);border-radius: 10px;"><div data-node="ij5UR" data-text="3" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">3</div></div></div></div>
+<div data-node="eSPhg" data-name="群聊 · 产品设计组" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="oD1Az" data-name="left" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="RTJME" data-name="av" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background: url(assets/unsplash-1690192434971-ab3480ffe97f.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;border-radius: 12px;overflow: hidden;"></div>
+<div data-node="uxHok" data-name="text" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 2px;"><div data-node="WjSjh" data-text="产品设计组（8）" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">产品设计组（8）</div>
+<div data-node="czyQZ" data-text="@你：PRD 已更新，今晚走查一下" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">@你：PRD 已更新，今晚走查一下</div></div></div>
+<div data-node="lWBqT" data-name="right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 6px;align-items: flex-end;"><div data-node="vdE6o" data-text="15:32" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">15:32</div>
+<div data-node="m35Ynz" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;border-radius: 10px;"></div></div></div>
+<div data-node="p6aLz" data-name="系统通知" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="T8NYq" data-name="Left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="aZ92m" data-name="Icon" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.251);background: linear-gradient(225deg, rgba(74,85,80,0.941) 0%, rgba(55,66,61,0.957) 100%);border-radius: 10px;"><i data-node="NXMzV" data-icon="bell" class="icon-bell" style="box-sizing: border-box; position: relative;position: absolute; left: 8px; top: 8px;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #2E3540; font-size: 18px; line-height: 1; flex: none;"></i></div>
+<div data-node="PT8aH" data-name="Text" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 2px;"><div data-node="bGm2d" data-text="系统通知" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">系统通知</div>
+<div data-node="i7HjcN" data-text="你加入的群有 2 条新公告。" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">你加入的群有 2 条新公告。</div></div></div>
+<div data-node="Si1Ri" data-name="Right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 6px;align-items: flex-end;"><div data-node="T75Hke" data-text="16:10" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">16:10</div>
+<div data-node="kMDpf" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;box-shadow: 0px 3px 9px rgba(34,197,94,0.384), inset 0 0 0 0.6px rgba(255,255,255,0.322);background: linear-gradient(202deg, rgba(27,106,61,0.949) 0%, rgba(31,122,72,0.957) 56%, rgba(17,100,80,0.949) 100%);border-radius: 10px;"><div data-node="J0dU9" data-text="1" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">1</div></div></div></div>
+<div data-node="hE2Bc" data-name="私聊 · 小王" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="aGFjE" data-name="Left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="unJGo" data-name="Avatar" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;border-radius: 50%;background: url(assets/unsplash-1640175985386-2c89f649a938.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;"></div>
+<div data-node="XWJIk" data-name="Text" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 2px;"><div data-node="IqkhC" data-text="小王" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">小王</div>
+<div data-node="V7yovd" data-text="你：OK，那我周末先去看两套。" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">你：OK，那我周末先去看两套。</div></div></div>
+<div data-node="GSDqZ" data-name="Right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 6px;align-items: flex-end;"><div data-node="BdpvK" data-text="15:58" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">15:58</div>
+<div data-node="o8ISj3" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;box-shadow: 0px 3px 8px rgba(127,29,29,0.333), inset 0 0 0 0.6px rgba(255,255,255,0.302);background: linear-gradient(202deg, rgba(122,16,34,0.949) 0%, rgba(159,18,57,0.957) 56%, rgba(91,27,66,0.949) 100%);border-radius: 10px;"><div data-node="lBtOp" data-text="5" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5</div></div></div></div>
+<div data-node="TVrkC" data-name="群聊 · 北迁互助" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 12px 14px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background-color: #242a34;border-radius: 18px;"><div data-node="WyhsF" data-name="Left" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="i7uWaK" data-name="Group Avatar" style="box-sizing: border-box; position: relative;width: 34px;height: 34px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.302);background: url(assets/unsplash-1522071820081-009f0129c71c.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;border-radius: 12px;overflow: hidden;"><div data-node="zm7qN" data-name="q1" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 17px;height: 17px;background: linear-gradient(225deg, rgba(108,124,255,0.533) 0%, rgba(184,168,245,0.4) 100%);"></div>
+<div data-node="D1nVz" data-name="q2" style="box-sizing: border-box; position: relative;position: absolute; left: 17px; top: 0px;width: 17px;height: 17px;background: linear-gradient(225deg, rgba(42,211,201,0.533) 0%, rgba(130,200,229,0.4) 100%);"></div>
+<div data-node="hPNf6" data-name="q3" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 17px;width: 17px;height: 17px;background: linear-gradient(225deg, rgba(130,200,229,0.533) 0%, rgba(155,180,255,0.4) 100%);"></div>
+<div data-node="q3z9iY" data-name="q4" style="box-sizing: border-box; position: relative;position: absolute; left: 17px; top: 17px;width: 17px;height: 17px;background: linear-gradient(225deg, rgba(42,211,201,0.4) 0%, rgba(108,124,255,0.333) 100%);"></div></div>
+<div data-node="Y44Xt" data-name="Text" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 2px;"><div data-node="w9Pv9" data-text="北迁互助（52）" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">北迁互助（52）</div>
+<div data-node="tOpKL" data-text="小组长：今晚 8 点语音，记得来。" style="box-sizing: border-box; position: relative;width: 220px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">小组长：今晚 8 点语音，记得来。</div></div></div>
+<div data-node="zmrmi" data-name="Right" style="box-sizing: border-box; position: relative;display: flex; flex-direction: column;gap: 6px;align-items: flex-end;"><div data-node="z2friC" data-text="昨天" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">昨天</div>
+<div data-node="XlpSR" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 8px;box-shadow: 0px 3px 8px rgba(127,29,29,0.333), inset 0 0 0 0.6px rgba(255,255,255,0.302);background: linear-gradient(202deg, rgba(122,16,34,0.949) 0%, rgba(159,18,57,0.957) 56%, rgba(91,27,66,0.949) 100%);border-radius: 10px;"><div data-node="GeYaY" data-text="12" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">12</div></div></div></div></div>
+<div data-node="laZbJ" data-name="Bottom Nav" style="box-sizing: border-box; position: relative;position: absolute; left: -1px; top: 758px;width: 376px;height: 72px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 10px 12px;box-shadow: inset 0 0 0 [object Object]px rgba(255,255,255,0.122);background-color: rgba(32,35,41,1);"><div data-node="N5j6y9" data-name="IF" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 6px;justify-content: center;align-items: center;"><i data-node="eqASF" data-icon="sparkles" class="icon-sparkles" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #D43C33; font-size: 20px; line-height: 1; flex: none;"></i>
+<div data-node="mJrbU" data-text="星球" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #D43C33;white-space: pre-wrap; word-break: break-word; margin: 0;">星球</div></div>
+<div data-node="XkgZZ" data-name="计划" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 6px;justify-content: center;align-items: center;"><i data-node="FENq1" data-icon="layout-grid" class="icon-layout-grid" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #E7EDF7; font-size: 20px; line-height: 1; flex: none;"></i>
+<div data-node="L40ZHB" data-text="广场" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 900;line-height: 1.4;color: #E7EDF7;white-space: pre-wrap; word-break: break-word; margin: 0;">广场</div></div>
+<div data-node="qcH7p" data-name="消息" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 6px;justify-content: center;align-items: center;"><i data-node="J8NSt" data-icon="message-circle" class="icon-message-circle" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #E7EDF7; font-size: 20px; line-height: 1; flex: none;"></i>
+<div data-node="oa6E0" data-text="消息" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #E7EDF7;white-space: pre-wrap; word-break: break-word; margin: 0;">消息</div></div>
+<div data-node="C2PY7i" data-name="我的" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 6px;justify-content: center;align-items: center;"><i data-node="oUEBz" data-icon="user" class="icon-user" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #E7EDF7; font-size: 20px; line-height: 1; flex: none;"></i>
+<div data-node="ECV1S" data-text="我的" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #E7EDF7;white-space: pre-wrap; word-break: break-word; margin: 0;">我的</div></div></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"text":"星球","to":"07-home.html"},{"text":"我的","to":"intimacy.html"},{"contains":"标签筛选","to":"messages-filter.html"},{"contains":"第二人格 · 置顶","to":"persona-chat.html"},{"contains":"北迁互助","to":"group-chat.html"},{"contains":"产品设计组","to":"group-chat.html"}],"prev":"persona-chat.html","next":"messages-filter.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+
+<script>
+(function(){const nav=byName('Bottom Nav');if(nav){nav.style.position='sticky';nav.style.bottom='0';nav.style.zIndex='50';nav.style.backdropFilter='blur(16px)';nav.style.webkitBackdropFilter='blur(16px)'}})();
+// conversation row hover lift + unread pulse
+document.querySelectorAll('[data-name$="置顶"],[data-name^="好友"],[data-name^="群聊"],[data-name^="系统"],[data-name^="私聊"],[data-name^="北迁"]').forEach(r=>{r.classList.add('u-click');r.querySelectorAll('[data-name="Unread"],[data-name^="dot"]').forEach(d=>d.classList.add('pulse'))});
+// recent contacts pulse
+document.querySelectorAll('[data-name="Unread Dot"]').forEach(d=>d.classList.add('pulse'));
+</script>
+
+</body>
+</html>

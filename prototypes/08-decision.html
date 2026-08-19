@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>08 决策辅助·第二人格 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">12 / 16</span>
+  <span class="crumb">08 决策辅助·第二人格</span>
+  <span class="sp"></span>
+  <a href="ip-settings.html">&#8592; 上一页</a>
+  <a href="group-chat.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:812px"><div data-node="KKURU" data-name="08 决策辅助 · 第二人格" style="box-sizing: border-box; position: relative;width: 375px;height: 812px;display: flex; flex-direction: column;background-color: #141416;overflow: hidden;"><div data-node="Uc1r9" data-name="w9" style="box-sizing: border-box; position: relative;align-self: stretch;flex: 1 1 0; min-height: 0;display: flex; flex-direction: column;gap: 16px;padding: 44px 20px 28px 20px;border-radius: 28px;"><div data-node="sY1FI" data-name="hdr9" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="GK7dM" data-name="h19" data-text="决策台" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 18px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">决策台</div></div>
+<div data-node="IqD9s" data-name="qs9" style="box-sizing: border-box; position: relative;align-self: stretch;height: 122px;display: flex; flex-direction: column;gap: 12px;padding: 44px 18px 18px 18px;box-shadow: 0px 10px 24px rgba(0,0,0,0.353), 0px -1px 4px rgba(255,255,255,0.18), inset 0 0 0 1px rgba(255,255,255,0.22);backdrop-filter: blur(20px) saturate(1.35); -webkit-backdrop-filter: blur(20px) saturate(1.35);background: linear-gradient(270deg, rgba(255,255,255,0.141) 0%, rgba(255,255,255,0.078) 45%, rgba(201,215,241,0.051) 100%);border-radius: 12px;overflow: hidden;"><i data-node="iK3CS" data-name="qsIcon" data-icon="sparkles" class="icon-sparkles" style="box-sizing: border-box; position: relative;position: absolute; left: 18px; top: 16px;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="hLPJw" data-name="qsLabel" data-text="你的提问" style="box-sizing: border-box; position: relative;position: absolute; left: 42px; top: 16px;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 700;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">你的提问</div>
+<div data-node="amoHn" data-name="Ref Glow Bottom Band" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 155px;width: 324px;height: 36px;opacity: 0.72;border-radius: 50%;background-color: rgba(43,48,56,0.149);filter: blur(3px);"></div>
+<div data-node="pYPvJ" data-name="qsT" data-text="offer A 钱少但成长快；offer B 钱多但重复。你选哪个？" style="box-sizing: border-box; position: relative;align-self: stretch;height: 51px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 15px;font-weight: 700;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;overflow: hidden;">offer A 钱少但成长快；offer B 钱多但重复。你选哪个？</div>
+<div data-node="x4udS" data-name="k3" style="box-sizing: border-box; position: relative;position: absolute; left: 285px; top: 65px;width: 36px;height: 36px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 8px 14px rgba(0,0,0,0.4);background-color: #D43C33;border-radius: 22px;"><i data-node="vnfVF" data-name="r5pi" data-icon="pencil" class="icon-pencil" style="box-sizing: border-box; position: relative;width: 17px;height: 17px;width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-size: 17px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="aoknE" data-name="split9" style="box-sizing: border-box; position: relative;align-self: stretch;height: 232px;display: flex; flex-direction: row;gap: 12px;"><div data-node="AZqUR" data-name="right9" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 10px;padding: 16px 16px 14px 16px;box-shadow: 0px 10px 20px rgba(0,0,0,0.4), inset 0 0 0 1px #2E3440;background: linear-gradient(260deg, rgba(27,23,26,0.988) 0%, rgba(22,24,30,0.988) 56%, rgba(19,22,28,0.988) 100%);border-radius: 12px;"><div data-node="cAZVI" data-name="Second Persona Row" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="FpDF0" data-name="Second Persona Avatar" style="box-sizing: border-box; position: relative;width: 27px;height: 27px;border-radius: 50%;background: url(assets/generated-1777201503182.png) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: 0px 4px 10px rgba(0,0,0,0.4), 0px 0px 6px rgba(212,60,51,0.2), inset 0 0 0 1px rgba(255,255,255,0.333);"></div>
+<div data-node="woU4L" data-name="Second Persona Label" data-text="第二人格W" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;letter-spacing: 1.4px;line-height: 1.4;color: #F5F7FB;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">第二人格W</div></div>
+<div data-node="Yxzr6" data-name="rt" data-text="选 B：先拿钱换稳定，再偷时间升级。" style="box-sizing: border-box; position: relative;align-self: stretch;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 14px;font-weight: 700;line-height: 1.45;color: #F5F7FB;white-space: pre-wrap; word-break: break-word; margin: 0;">选 B：先拿钱换稳定，再偷时间升级。</div>
+<div data-node="KkRqE" data-name="rb" data-text="理由：风险厌恶更低。" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #B7C2D3;white-space: pre-wrap; word-break: break-word; margin: 0;">理由：风险厌恶更低。</div>
+<div data-node="yHxRL" data-name="wmB" data-text="B" style="box-sizing: border-box; position: relative;position: absolute; left: 250px; top: 2px;opacity: 0.85;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 64px;font-weight: 700;letter-spacing: 2px;line-height: 1.4;color: rgba(212,60,51,0.251);white-space: pre-wrap; word-break: break-word; margin: 0;">B</div>
+<div data-node="k0eS8V" data-name="chipsB" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 8px;align-items: center;"><div data-node="W5UG9" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 4px 7px;box-shadow: 0px 4px 10px rgba(0,0,0,0.333);background-color: #D43C33;border-radius: 999px;"><div data-node="j6Zf7P" data-text="稳健型" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 7px;font-weight: 800;letter-spacing: 1px;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">稳健型</div></div>
+<div data-node="j21rya" data-name="B1" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;align-items: center;padding: 4px 7px;box-shadow: inset 0 0 0 0.8px #3D4B61;background-color: #202734;border-radius: 999px;"><div data-node="U7UhA4" data-text="社交型" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 7px;font-weight: 800;letter-spacing: 1px;line-height: 1.4;color: #D5DEEC;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">社交型</div></div>
+<div data-node="bEG0p" data-name="B2" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;align-items: center;padding: 4px 7px;box-shadow: inset 0 0 0 0.8px #3D4B61;background-color: #202734;border-radius: 999px;"><div data-node="M2uTkU" data-text="自律型" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 7px;font-weight: 800;letter-spacing: 1px;line-height: 1.4;color: #D5DEEC;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">自律型</div></div></div>
+<div data-node="CwoCw" data-name="bulletsB" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 4px;"><div data-node="QpY1j" data-name="bulletsA" style="box-sizing: border-box; position: relative;width: 126px;height: 38px;display: flex; flex-direction: column;gap: 6px;"><div data-node="c4E5hE" data-name="rowA1" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 8px;"><div data-node="n5aNX7" style="box-sizing: border-box; position: relative;width: 5px;height: 5px;border-radius: 50%;background-color: #1c212a;"></div>
+<div data-node="RbmBD" data-text="先拿确定性，再偷时间升级。" style="box-sizing: border-box; position: relative;width: 188px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">先拿确定性，再偷时间升级。</div></div></div></div></div></div>
+<div data-node="MO6CS" data-name="act9" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;"><div data-node="RZG9h" data-name="btn4" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 46px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 4px 4px 7px rgba(0,0,0,0.6), -4px -4px 7px rgba(255,255,255,0.078), inset 0 0 0 0.5px rgba(255,255,255,0.302);background-color: #d43c33;border-radius: 23px;"><div data-node="P5uzzZ" data-name="btn4t" data-text="去聊聊这个" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 15px;font-weight: 800;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">去聊聊这个</div></div></div>
+<div data-node="Z7mDm" data-name="Ask · Input" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 10px;padding: 12px 14px;box-shadow: 0px 12px 22px rgba(0,0,0,0.314), 0px -2px 10px rgba(255,255,255,0.078), inset 0 0 0 1px rgba(255,255,255,0.302);backdrop-filter: blur(24px) saturate(1.35); -webkit-backdrop-filter: blur(24px) saturate(1.35);background-color: #242a34;border-radius: 16px;"></div>
+<div data-node="K0pLY" data-name="__test" style="box-sizing: border-box; position: relative;width: 10px;height: 10px;"></div>
+<div data-node="Frtnh" data-name="__test" style="box-sizing: border-box; position: relative;width: 10px;height: 10px;"></div>
+<div data-node="azFoM" data-name="space" style="box-sizing: border-box; position: relative;align-self: stretch;height: 18px;display: flex; flex-direction: row;"></div></div>
+<div data-node="fnbmz" data-name="sbG" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="F0fAHN" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="oCkcK" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="p4mG3" data-name="cell" data-icon="signal" class="icon-signal" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="MtZaW" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<i data-node="u4MOX" data-name="wifi" data-icon="wifi" class="icon-wifi" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<i data-node="h5WuOy" data-name="batt" data-icon="battery-full" class="icon-battery-full" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="i1bx8Q" data-name="__test" style="box-sizing: border-box; position: relative;position: absolute; left: 32px; top: 100px;width: 10px;height: 10px;"></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"contains":"去聊聊这个","to":"persona-chat.html"}],"prev":"ip-settings.html","next":"group-chat.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+
+<script>
+// choice interaction: hover to see detail
+document.querySelectorAll('[data-name^="split"] [data-name]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>toast('选择已记录，去和 TA 聊聊吧','✓'))});
+// reasoning bullet stagger
+document.querySelectorAll('[data-name^="bullets"] [data-name^="row"]').forEach((r,i)=>{r.style.animationDelay=(i*80)+'ms';r.style.animation='riseIn .5s both'});
+</script>
+<script>(function(){var bar=document.createElement('div');
+bar.style.cssText='display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(14,14,18,.92);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:40;overflow:hidden';
+bar.innerHTML='<span class="icon-chevron-left" style="font-size:20px;margin-right:4px;color:#fff;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;cursor:pointer;flex:none"></span><span style="font-size:15px;font-weight:600;color:rgba(255,255,255,.8)">星海首页</span>';
+bar.querySelector('.icon-chevron-left').onclick=function(){toPage('07-home.html')};
+var can=document.querySelector('.canvas');if(can)can.insertBefore(bar,can.firstChild);})();</script>
+</body>
+</html>

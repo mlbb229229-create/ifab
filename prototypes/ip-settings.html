@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IP 设置 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">11 / 16</span>
+  <span class="crumb">IP 设置</span>
+  <span class="sp"></span>
+  <a href="intimacy.html">&#8592; 上一页</a>
+  <a href="08-decision.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:812px"><div data-node="zYjYn" data-name="IP设置（入口还没确定）" style="box-sizing: border-box; position: relative;width: 375px;height: 812px;display: flex; flex-direction: column;gap: 14px;padding: 0px 12px 12px 12px;background-color: #141416;overflow: hidden;"><div data-node="YYl2W" data-name="Top Chrome" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 2px;"><div data-node="KcnZc" data-name="Status Bar" style="box-sizing: border-box; position: relative;align-self: stretch;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="t0Nzv" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="ZqB0V" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><span data-node="FplmI" data-name="cell" data-icon="signal_cellular_alt" class="msr" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;">signal_cellular_alt</span>
+<div data-node="Up1Uy" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<span data-node="nzkqz" data-name="wifi" data-icon="wifi" class="msr" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;">wifi</span>
+<span data-node="tue5D" data-name="batt" data-icon="battery_full" class="msr" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;">battery_full</span></div></div>
+<div data-node="g0BgKO" data-name="Top Navigation" style="box-sizing: border-box; position: relative;align-self: stretch;height: 31px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 0px 12px 7px 12px;"><i data-node="FKwfs" data-name="Menu Icon" data-icon="chevron-left" class="icon-chevron-left" style="box-sizing: border-box; position: relative;width: 24px;height: 24px;width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 24px; line-height: 1; flex: none;"></i>
+<div data-node="d4K8Z" data-name="App Title" data-text="IF" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 18px;font-weight: 800;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">IF</div>
+<div data-node="RGVC2" data-name="Right Actions" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 12px;align-items: center;"><i data-node="rs6va" data-name="moreIcon" data-icon="more-horizontal" class="icon-more-horizontal" style="box-sizing: border-box; position: relative;width: 22px;height: 22px;width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 22px; line-height: 1; flex: none;"></i></div></div></div>
+<div data-node="tbwpB" data-name="IP Settings Content" style="box-sizing: border-box; position: relative;align-self: stretch;flex: 1 1 0; min-height: 0;display: flex; flex-direction: column;gap: 14px;align-items: center;padding: 12px 0px 110px 0px;"><div data-node="f6Ybm" data-name="Stage" style="box-sizing: border-box; position: relative;width: 310px;height: 413px;display: block;box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.302);backdrop-filter: blur(18px) saturate(1.35); -webkit-backdrop-filter: blur(18px) saturate(1.35);background: url(assets/ip-waist.png) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;border-radius: 18px;overflow: hidden;"><div data-node="EtovS" data-name="HUD" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 320px;height: 427px;display: block;overflow: hidden;"><div data-node="C8g21" data-name="Corner TL" style="box-sizing: border-box; position: relative;position: absolute; left: 10px; top: 10px;width: 46px;height: 46px;box-shadow: inset 0 0 0 1.2px rgba(255,255,255,0.4);border-radius: 10px;"></div>
+<div data-node="R1U47u" data-name="Corner BR" style="box-sizing: border-box; position: relative;position: absolute; left: 264px; top: 371px;width: 46px;height: 46px;box-shadow: inset 0 0 0 1.2px rgba(255,255,255,0.4);border-radius: 10px;"></div>
+<div data-node="IYJi6" data-name="Tech" data-text="SYNC · IF" style="box-sizing: border-box; position: relative;position: absolute; left: 16px; top: 385px;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">SYNC · IF</div>
+<div data-node="RL2F2" data-name="Dot" style="box-sizing: border-box; position: relative;position: absolute; left: 292px; top: 18px;width: 8px;height: 8px;border-radius: 50%;background-color: #1c212a;box-shadow: 0px 0px 10px rgba(42,211,201,0.4);"></div></div></div>
+<div data-node="mCgFj" data-name="Style Section" style="box-sizing: border-box; position: relative;width: 330px;height: 66px;display: flex; flex-direction: column;gap: 10px;"><div data-node="nDJIA" data-text="风格" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">风格</div>
+<div data-node="MI4b2" data-name="chips" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 8px;"><div data-node="XeU3r" data-name="温柔" style="box-sizing: border-box; position: relative;height: 28px;display: flex; flex-direction: row;align-items: center;padding: 6px 10px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.333);background-color: #D43C33;border-radius: 14px;"><div data-node="S8JtS" data-text="温柔" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 900;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">温柔</div></div>
+<div data-node="i3ObrZ" data-name="科技感" style="box-sizing: border-box; position: relative;height: 28px;display: flex; flex-direction: row;align-items: center;padding: 6px 10px;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.6);background-color: rgba(212,60,51,0.122);border-radius: 14px;"><div data-node="FdTuj" data-text="科技感" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">科技感</div></div>
+<div data-node="GVcKa" data-name="可爱" style="box-sizing: border-box; position: relative;height: 28px;display: flex; flex-direction: row;align-items: center;padding: 6px 10px;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.6);background-color: rgba(212,60,51,0.122);border-radius: 14px;"><div data-node="NHf6J" data-text="可爱" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">可爱</div></div>
+<div data-node="g5gAJ" data-name="成熟" style="box-sizing: border-box; position: relative;height: 28px;display: flex; flex-direction: row;align-items: center;padding: 6px 10px;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.6);background-color: rgba(212,60,51,0.122);border-radius: 14px;"><div data-node="S5UCa" data-text="成熟" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">成熟</div></div></div></div>
+<div data-node="lE92Q" data-name="Tuning Section" style="box-sizing: border-box; position: relative;width: 330px;height: 108px;display: flex; flex-direction: column;gap: 10px;"><div data-node="yJGlO" data-text="参数" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">参数</div>
+<div data-node="F7Wct" data-name="温柔度" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="r5hxQ" data-text="温柔度" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">温柔度</div>
+<div data-node="IQ1fv" data-name="Track" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 5px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.302);backdrop-filter: blur(10px) saturate(1.35); -webkit-backdrop-filter: blur(10px) saturate(1.35);background-color: rgba(255,255,255,0.102);border-radius: 5px;"><div data-node="tNXXb" data-name="Fill" style="box-sizing: border-box; position: relative;width: 140px;height: 5px;background-color: #D43C33;border-radius: 5px;"></div>
+<div data-node="xOBKy" data-name="Thumb" style="box-sizing: border-box; position: relative;position: absolute; left: 130px; top: -4px;width: 12px;height: 12px;display: flex; flex-direction: row;border: 2px solid rgba(212,60,51,0.4);box-shadow: 0px 4px 10px rgba(11,59,102,0.102);background-color: #FFF5F5;border-radius: 20px;"></div></div></div>
+<div data-node="PPsp1" data-name="科技感" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="ss0q7" data-text="科技感" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">科技感</div>
+<div data-node="hc93s" data-name="Track" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 5px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.302);backdrop-filter: blur(10px) saturate(1.35); -webkit-backdrop-filter: blur(10px) saturate(1.35);background-color: rgba(255,255,255,0.102);border-radius: 5px;"><div data-node="uxxQG" data-name="Fill" style="box-sizing: border-box; position: relative;width: 96px;height: 5px;background-color: #D43C33;border-radius: 5px;"></div>
+<div data-node="VrioI" data-name="Thumb" style="box-sizing: border-box; position: relative;position: absolute; left: 86px; top: -4px;width: 12px;height: 12px;display: flex; flex-direction: row;border: 2px solid rgba(212,60,51,0.4);box-shadow: 0px 4px 10px rgba(11,59,102,0.102);background-color: #FFF5F5;border-radius: 20px;"></div></div></div>
+<div data-node="W0ZHW" data-name="活力" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="SJkXf" data-text="活力" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">活力</div>
+<div data-node="tXCP9" data-name="Track" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 5px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.302);backdrop-filter: blur(10px) saturate(1.35); -webkit-backdrop-filter: blur(10px) saturate(1.35);background-color: rgba(255,255,255,0.102);border-radius: 5px;"><div data-node="Y3fj31" data-name="Fill" style="box-sizing: border-box; position: relative;width: 120px;height: 5px;background-color: #D43C33;border-radius: 5px;"></div>
+<div data-node="TVdzU" data-name="Thumb" style="box-sizing: border-box; position: relative;position: absolute; left: 110px; top: -4px;width: 12px;height: 12px;display: flex; flex-direction: row;border: 2px solid rgba(212,60,51,0.4);box-shadow: 0px 4px 10px rgba(11,59,102,0.102);background-color: #FFF5F5;border-radius: 20px;"></div></div></div></div>
+<div data-node="nF8OZ" data-name="Actions" style="box-sizing: border-box; position: relative;width: 330px;display: flex; flex-direction: row;gap: 10px;justify-content: space-between;"><div data-node="yahy3" data-name="随机" style="box-sizing: border-box; position: relative;width: 103px;height: 41px;display: flex; flex-direction: column;justify-content: center;align-items: center;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.702);background-color: rgba(212,60,51,0.157);border-radius: 18px;"><div data-node="jKjtu" data-text="随机" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">随机</div></div>
+<div data-node="yK34z" data-name="重置" style="box-sizing: border-box; position: relative;width: 103px;height: 41px;display: flex; flex-direction: column;justify-content: center;align-items: center;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.702);background-color: rgba(212,60,51,0.157);border-radius: 18px;"><div data-node="XORG3" data-text="重置" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">重置</div></div>
+<div data-node="Xcfyb" data-name="保存" style="box-sizing: border-box; position: relative;width: 103px;height: 41px;display: flex; flex-direction: column;justify-content: center;align-items: center;box-shadow: 0px 8px 16px rgba(212,60,51,0.302), inset 0 0 0 1px rgba(255,255,255,0.251);background-color: #D43C33;border-radius: 18px;"><div data-node="XFJIP" data-text="保存" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;">保存</div></div></div></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"name":"Back","to":"intimacy.html"}],"prev":"intimacy.html","next":"08-decision.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+<script>
+
+(function(){const g=byName("chips");if(!g)return;g.dataset.toggleGroup="single";[...g.children].forEach(c=>{c.dataset.toggle='1';c.classList.add('u-click');c.addEventListener('click',()=>{if("single"==='multi'){c.classList.toggle('chip-on')}else{[...g.children].forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})})();
+</script>
+<script>
+// sliders with value indicator
+document.querySelectorAll('[data-name="Track"]').forEach(tr=>{
+  const fill=tr.querySelector('[data-name="Fill"]'),thumb=tr.querySelector('[data-name="Thumb"]');
+  tr.style.cursor='pointer';
+  const lbl=tr.parentElement?tr.parentElement.querySelector('[data-text]'):null;if(lbl&&!lbl.dataset._val){lbl.dataset._val='1';const v=document.createElement('span');v.style.cssText='font-size:12px;color:rgba(255,255,255,.45);margin-left:8px;font-variant-numeric:tabular-nums';v.className='val';lbl.parentElement.style.display='flex';lbl.parentElement.style.justifyContent='space-between';lbl.parentElement.appendChild(v)}
+  const set=x=>{const r=tr.getBoundingClientRect();let p=Math.max(0,Math.min(1,(x-r.left)/r.width));if(fill)fill.style.width=(p*100)+'%';if(thumb){thumb.style.left=(p*100)+'%';thumb.style.transform='translateX(-50%)'}const v=tr.parentElement?tr.parentElement.querySelector('.val'):null;if(v)v.textContent=Math.round(p*100)+'%'};
+  if(thumb){thumb.style.position='absolute';thumb.style.transform='translateX(-50%)'}
+  tr.addEventListener('pointerdown',e=>{set(e.clientX);const mv=ev=>set(ev.clientX);const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+});
+const rnd=byText('随机'),rst=byText('重置'),sav=byText('保存');
+if(rnd)rnd.closest('[data-name]').classList.add('u-click'),rnd.addEventListener('click',()=>{document.querySelectorAll('[data-name="Track"]').forEach(tr=>{const p=Math.random();const fill=tr.querySelector('[data-name="Fill"]'),thumb=tr.querySelector('[data-name="Thumb"]');if(fill)fill.style.width=(p*100)+'%';if(thumb){thumb.style.left=(p*100)+'%';thumb.style.transform='translateX(-50%)'}const v=tr.parentElement?tr.parentElement.querySelector('.val'):null;if(v)v.textContent=Math.round(p*100)+'%'});toast('已随机生成参数','🎲')});
+if(rst)rst.addEventListener('click',()=>toast('已重置为默认','↺'));
+if(sav)sav.addEventListener('click',()=>toast('人格参数已保存','✓'));
+// preview glow
+document.querySelectorAll('[data-name="Corner TL"],[data-name="Corner BR"]').forEach(e=>{e.style.animation='pulseGlow 3s ease-in-out infinite'});
+</script>
+<script>(function(){var bar=document.createElement('div');
+bar.style.cssText='display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(14,14,18,.92);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:40;overflow:hidden';
+bar.innerHTML='<span class="icon-chevron-left" style="font-size:20px;margin-right:4px;color:#fff;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;cursor:pointer;flex:none"></span><span style="font-size:15px;font-weight:600;color:rgba(255,255,255,.8)">亲密度</span>';
+bar.querySelector('.icon-chevron-left').onclick=function(){toPage('intimacy.html')};
+var can=document.querySelector('.canvas');if(can)can.insertBefore(bar,can.firstChild);})();</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IF App · HTML Prototypes Gallery</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;background:#07070a;color:#fff;min-height:100vh;
+background-image:radial-gradient(1000px 520px at 10% -10%, rgba(220,38,38,.12), transparent 60%),radial-gradient(800px 500px at 95% 110%, rgba(153,27,27,.1), transparent 60%)}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 28px 72px}
+.hero{margin-bottom:44px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:2.5px;color:rgba(255,255,255,.45);text-transform:uppercase;border:1px solid rgba(255,255,255,.12);padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.03)}
+h1{font-size:clamp(30px,4.5vw,46px);font-weight:800;letter-spacing:.5px;margin:18px 0 10px;background:linear-gradient(120deg,#fff 30%,#fecdd3 60%,#ef4444);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:rgba(255,255,255,.5);font-size:15px;max-width:640px;line-height:1.8}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:26px}
+.card{display:block;text-decoration:none;color:#fff;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;transition:transform .3s cubic-bezier(.2,.8,.3,1),border-color .3s,box-shadow .3s}
+.card:hover{transform:translateY(-6px);border-color:rgba(255,85,61,.45);box-shadow:0 24px 60px -18px rgba(220,38,38,.35)}
+.thumb{position:relative;aspect-ratio:375/640;overflow:hidden;background:#000;pointer-events:none}
+.thumb iframe{width:375px;height:812px;border:0;transform:scale(.62);transform-origin:0 0;position:absolute;top:0;left:50%;margin-left:-116px}
+.meta{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:14px}
+.no{font-variant-numeric:tabular-nums;color:rgba(255,255,255,.3);font-size:12px}
+.t{font-weight:600;flex:1}
+.go{font-size:12px;color:rgba(255,255,255,.35);transition:.25s}
+.card:hover .go{color:#fca5a5;transform:translateX(3px)}
+@media (max-width:640px){.wrap{padding:36px 16px 56px}.thumb iframe{transform:scale(.55);margin-left:-103px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow">IF · Parallel Persona — Vibe Coding Showcase</span>
+    <h1>平行人格 App · 设计稿预览</h1>
+    <p class="sub">由 Pencil 设计稿自动转换为前端页面，共 16 屏。深色宇宙主题 + 红色点缀的设计语言，已补齐页面跳转、组件交互与响应式预览。点击任意卡片进入单页体验，键盘 ←/→ 可翻页。</p>
+    <p class="sub" style="margin-top:10px">16 clickable screens, hand-coded as standalone HTML/CSS/JS from the original Pencil design specs. The production-grade React version is available at <a href="../" style="color:#fca5a5">the app demo</a>.</p>
+  </div>
+  <div class="grid">
+
+  <a class="card" href="01-guide.html">
+    <div class="thumb"><iframe src="01-guide.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">01</span><span class="t">01 引导页</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="02-login.html">
+    <div class="thumb"><iframe src="02-login.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">02</span><span class="t">02 登录注册</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="login-modal.html">
+    <div class="thumb"><iframe src="login-modal.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">03</span><span class="t">登录弹窗</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="phone-login.html">
+    <div class="thumb"><iframe src="phone-login.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">04</span><span class="t">手机号登录</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="verification.html">
+    <div class="thumb"><iframe src="verification.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">05</span><span class="t">验证码</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="03-profile.html">
+    <div class="thumb"><iframe src="03-profile.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">06</span><span class="t">03 欢迎与基础档案</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="04-create-persona.html">
+    <div class="thumb"><iframe src="04-create-persona.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">07</span><span class="t">04 创建平行人格</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="06-onboarding.html">
+    <div class="thumb"><iframe src="06-onboarding.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">08</span><span class="t">06 首页·新用户引导</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="07-home.html">
+    <div class="thumb"><iframe src="07-home.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">09</span><span class="t">07 首页·星海</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="intimacy.html">
+    <div class="thumb"><iframe src="intimacy.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">10</span><span class="t">亲密度</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="ip-settings.html">
+    <div class="thumb"><iframe src="ip-settings.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">11</span><span class="t">IP 设置</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="08-decision.html">
+    <div class="thumb"><iframe src="08-decision.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">12</span><span class="t">08 决策辅助·第二人格</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="group-chat.html">
+    <div class="thumb"><iframe src="group-chat.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">13</span><span class="t">群组聊天</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="persona-chat.html">
+    <div class="thumb"><iframe src="persona-chat.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">14</span><span class="t">平行人格聊天</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="messages.html">
+    <div class="thumb"><iframe src="messages.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">15</span><span class="t">消息</span><span class="go">预览 &#8594;</span></div>
+  </a>
+
+  <a class="card" href="messages-filter.html">
+    <div class="thumb"><iframe src="messages-filter.html" loading="lazy" scrolling="no" tabindex="-1"></iframe></div>
+    <div class="meta"><span class="no">16</span><span class="t">消息·标签筛选</span><span class="go">预览 &#8594;</span></div>
+  </a>
+  </div>
+</div>
+</body>
+</html>

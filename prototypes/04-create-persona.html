@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>04 创建平行人格 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">07 / 16</span>
+  <span class="crumb">04 创建平行人格</span>
+  <span class="sp"></span>
+  <a href="03-profile.html">&#8592; 上一页</a>
+  <a href="06-onboarding.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:887px"><div data-node="e1bx5" data-name="04 创建平行人格" style="box-sizing: border-box; position: relative;width: 375px;height: 887px;display: flex; flex-direction: column;gap: 12px;padding: 0px 12px 12px 12px;background-color: #141416;overflow: hidden;"><div data-node="x9KBdC" data-name="Status Bar" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="Z1Zra" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="o56J8" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="fHYlw" data-name="cell" data-icon="signal" class="icon-signal" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="iaRz0" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<i data-node="Jjfft" data-name="wifi" data-icon="wifi" class="icon-wifi" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<i data-node="xi0qv" data-name="batt" data-icon="battery-full" class="icon-battery-full" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="VgjRY" data-name="Top" style="box-sizing: border-box; position: relative;position: absolute; left: 12px; top: 32px;width: 351px;height: 56px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 10px 22px rgba(153,27,27,0.063);backdrop-filter: blur(16px) saturate(1.35); -webkit-backdrop-filter: blur(16px) saturate(1.35);"><i data-node="l0XEIU" data-name="Back" data-icon="chevron-left" class="icon-chevron-left" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 17px;width: 22px;height: 22px;width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 22px; line-height: 1; flex: none;"></i>
+<div data-node="CZHMq" data-name="Title" data-text="IF人格形象" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">IF人格形象</div></div>
+<div data-node="kEl2X" data-name="Body" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 12px;padding: 104px 0px 0px 0px;"><div data-node="lBQk8" data-name="Second Persona Seed" data-text="为你生成初始第二人格" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">为你生成初始第二人格</div>
+<div data-node="Q9n0n" data-name="IP Preview" style="box-sizing: border-box; position: relative;align-self: stretch;height: 456px;display: flex; flex-direction: column;gap: 10px;align-items: center;padding: 14px;box-shadow: 0px 18px 48px rgba(108,124,255,0.11), 0px 4px 14px rgba(0,0,0,0.063);backdrop-filter: blur(24px) saturate(1.35); -webkit-backdrop-filter: blur(24px) saturate(1.35);border-radius: 22px;"><div data-node="OfHvP" data-name="Stage" style="box-sizing: border-box; position: relative;width: 310px;height: 413px;display: block;box-shadow: inset 0 0 0 1.1px rgba(255,255,255,0.302);backdrop-filter: blur(18px) saturate(1.35); -webkit-backdrop-filter: blur(18px) saturate(1.35);background: url(assets/ip-waist.png) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;border-radius: 18px;overflow: hidden;"><div data-node="w5awgZ" data-name="HUD" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 320px;height: 427px;display: block;overflow: hidden;"><div data-node="icaZF" data-name="Corner TL" style="box-sizing: border-box; position: relative;position: absolute; left: 10px; top: 10px;width: 46px;height: 46px;box-shadow: inset 0 0 0 1.2px rgba(255,255,255,0.4);border-radius: 10px;"></div>
+<div data-node="Q8NxlD" data-name="Corner BR" style="box-sizing: border-box; position: relative;position: absolute; left: 264px; top: 371px;width: 46px;height: 46px;box-shadow: inset 0 0 0 1.2px rgba(255,255,255,0.4);border-radius: 10px;"></div>
+<div data-node="BC0bC" data-name="Tech" data-text="SYNC · IF" style="box-sizing: border-box; position: relative;position: absolute; left: 16px; top: 385px;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">SYNC · IF</div>
+<div data-node="ixCMT" data-name="Dot" style="box-sizing: border-box; position: relative;position: absolute; left: 292px; top: 18px;width: 8px;height: 8px;border-radius: 50%;background-color: #1c212a;box-shadow: 0px 0px 10px rgba(42,211,201,0.4);"></div></div></div></div>
+<div data-node="E3fqav" data-name="IP命名" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 8px;"><div data-node="otOTn" data-text="你的互补人格叫" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">你的互补人格叫</div>
+<div data-node="BbdjR" data-name="Name Input" style="box-sizing: border-box; position: relative;align-self: stretch;height: 48px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 0px 18px;box-shadow: 0px 10px 26px rgba(0,0,0,0.333), 0px -1px 10px rgba(255,255,255,0.102), inset 0 0 0 1px rgba(255,255,255,0.349);backdrop-filter: blur(22px) saturate(1.35); -webkit-backdrop-filter: blur(22px) saturate(1.35);background-color: #323A48;border-radius: 16px;"><div data-node="lBxxW" data-text="给TA取个名字…" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 600;line-height: 1.4;color: #C9D6E8;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">给TA取个名字…</div>
+<i data-node="s9Wv7W" data-icon="pencil" class="icon-pencil" style="box-sizing: border-box; position: relative;width: 17px;height: 17px;width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; color: #8B96A8; font-size: 17px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="oWVTJ" data-name="Traits" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 10px;"><div data-node="J5hyA" data-text="性格标签（可多选）" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 800;letter-spacing: 2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">性格标签（可多选）</div>
+<div data-node="FMtV9" data-name="Wrap" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 8px;overflow: hidden;"><div data-node="x6iP6u" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 7px 12px;box-shadow: 0px 10px 22px rgba(108,124,255,0.094), inset 0 0 0 1px rgba(255,255,255,0.4);backdrop-filter: blur(12px) saturate(1.35); -webkit-backdrop-filter: blur(12px) saturate(1.35);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><div data-node="RPZZq" data-text="冷静" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">冷静</div></div>
+<div data-node="og83Q" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 7px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><div data-node="p7N1zU" data-text="毒舌" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">毒舌</div></div>
+<div data-node="EluqK" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 7px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><div data-node="HtVOn" data-text="温柔" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">温柔</div></div>
+<div data-node="zMY3B" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 7px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><div data-node="HwD6G" data-text="理性" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">理性</div></div>
+<div data-node="kIMpc" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 7px 12px;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><div data-node="SorKJ" data-text="反差萌" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">反差萌</div></div></div>
+<div data-node="LxkiG" data-name="自定义标签" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;padding: 8px 12px;box-shadow: 0px 10px 22px rgba(108,124,255,0.078), inset 0 0 0 1px rgba(255,255,255,0.4);backdrop-filter: blur(14px) saturate(1.35); -webkit-backdrop-filter: blur(14px) saturate(1.35);background: linear-gradient(225deg, rgba(47,19,24,0.8) 0%, rgba(36,16,21,0.8) 100%);border-radius: 999px;"><i data-node="MLauq" data-icon="type" class="icon-type" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #AEB5C2; font-size: 16px; line-height: 1; flex: none;"></i>
+<div data-node="AvZLZ" data-text="自定义标签（打字）" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">自定义标签（打字）</div></div></div>
+<div data-node="yOKqK" data-name="CTA" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 8px;padding: 6px 0px 0px 0px;"><div data-node="GFlSU" data-name="Spacer" style="box-sizing: border-box; position: relative;align-self: stretch;height: 6px;display: flex; flex-direction: row;"></div>
+<div data-node="q7M9cj" data-name="完成并进入星球" style="box-sizing: border-box; position: relative;align-self: stretch;height: 50px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 4px 4px 7px rgba(0,0,0,0.6), -4px -4px 7px rgba(255,255,255,0.078), inset 0 0 0 0.5px rgba(255,255,255,0.302);background-color: #D43C33;border-radius: 25px;"><div data-node="ZxYw9" data-text="下一步" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 15px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">下一步</div></div></div></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"name":"Back","to":"03-profile.html"},{"text":"下一步","to":"06-onboarding.html"}],"prev":"03-profile.html","next":"06-onboarding.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+<script>
+
+(function(){const g=byName("Wrap");if(!g)return;g.dataset.toggleGroup="multi";[...g.children].forEach(c=>{c.dataset.toggle='1';c.classList.add('u-click');c.addEventListener('click',()=>{if("multi"==='multi'){c.classList.toggle('chip-on')}else{[...g.children].forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})})();
+</script>
+
+<script>(function(){var bar=document.createElement('div');
+bar.style.cssText='display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(14,14,18,.92);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:40;overflow:hidden';
+bar.innerHTML='<span class="icon-chevron-left" style="font-size:20px;margin-right:4px;color:#fff;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;cursor:pointer;flex:none"></span><span style="font-size:15px;font-weight:600;color:rgba(255,255,255,.8)">基础档案</span>';
+bar.querySelector('.icon-chevron-left').onclick=function(){toPage('03-profile.html')};
+var can=document.querySelector('.canvas');if(can)can.insertBefore(bar,can.firstChild);})();</script>
+</body>
+</html>

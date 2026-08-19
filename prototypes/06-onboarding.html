@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>06 首页·新用户引导 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">08 / 16</span>
+  <span class="crumb">06 首页·新用户引导</span>
+  <span class="sp"></span>
+  <a href="04-create-persona.html">&#8592; 上一页</a>
+  <a href="07-home.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:812px"><div data-node="m8wyhT" data-name="06 首页 · 新用户引导" style="box-sizing: border-box; position: relative;width: 375px;height: 812px;display: block;background-color: #141416;overflow: hidden;"><div data-node="m5P517" data-name="sbE" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="UIbkO" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="ptrwb" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="F1IGZa" data-name="cell" data-icon="signal" class="icon-signal" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="GdtN5" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<i data-node="hMLVq" data-name="wifi" data-icon="wifi" class="icon-wifi" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<i data-node="jExoq" data-name="batt" data-icon="battery-full" class="icon-battery-full" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="wJS3X" data-name="Glass Card" style="box-sizing: border-box; position: relative;position: absolute; left: 24px; top: 279px;width: 328px;height: 241px;display: flex; flex-direction: column;gap: 14px;padding: 20px;box-shadow: 0px 10px 14px rgba(0,0,0,0.271), 0px 0px 5px rgba(232,72,85,0.125), inset 0 0 0 0.7px rgba(255,127,138,0.322);backdrop-filter: blur(12px) saturate(1.35); -webkit-backdrop-filter: blur(12px) saturate(1.35);background: linear-gradient(270deg, rgba(37,40,48,0.969) 0%, rgba(25,28,34,0.98) 52%, rgba(18,21,25,0.988) 100%);border-radius: 16px;overflow: hidden;"><div data-node="r1tdTp" data-name="Ref Glow Bottom" style="box-sizing: border-box; position: relative;position: absolute; left: -12px; top: 84px;width: 344px;height: 122px;opacity: 0.22;border-radius: 50%;background: radial-gradient(circle, rgba(251,90,85,0.208) 0%, rgba(212,60,51,0.145) 45%, rgba(0,0,0,0) 100%);filter: blur(4px);"></div>
+<div data-node="ZW0By" data-name="Title" data-text="写下一个IF想法" style="box-sizing: border-box; position: relative;align-self: stretch;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 19px;font-weight: 900;line-height: 1.2;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">写下一个IF想法</div>
+<div data-node="c4TyWa" data-name="Sub" data-text="你经常说的那句如果是什么？" style="box-sizing: border-box; position: relative;align-self: stretch;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #C9D1DE;white-space: pre-wrap; word-break: break-word; margin: 0;">你经常说的那句如果是什么？</div>
+<div data-node="hQBln" data-name="Input Capsule" style="box-sizing: border-box; position: relative;align-self: stretch;height: 132px;display: flex; flex-direction: row;gap: 10px;justify-content: space-between;align-items: center;"><div data-node="OYCov" data-name="Two Bubbles" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;align-self: stretch;display: flex; flex-direction: column;gap: 10px;align-items: center;"><div data-node="S6h7tM" data-name="Bubble · 如果" style="box-sizing: border-box; position: relative;align-self: stretch;height: 54px;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="rSkYA" data-name="Badge 如果" style="box-sizing: border-box; position: relative;width: 40px;height: 40px;display: flex; flex-direction: column;justify-content: center;align-items: center;box-shadow: inset 0 0 0 0.65px rgba(255,0,0,0.329);background-color: rgba(114,29,29,1);border-radius: 27px;"><div data-node="S74Yxp" data-name="Label" data-text="如果" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;text-align: center;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">如果</div></div>
+<div data-node="bMMKj" data-name="Input Slot" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 40px;display: flex; flex-direction: row;gap: 8px;align-items: center;padding: 0px 14px;box-shadow: inset 0 0 0 0.55px rgba(255,255,255,0.169);backdrop-filter: blur(4px) saturate(1.35); -webkit-backdrop-filter: blur(4px) saturate(1.35);background-color: rgba(11,14,20,0.941);border-radius: 12px;"><div data-node="AVit4" data-name="Placeholder" data-text="请输入你的“如果”..." style="box-sizing: border-box; position: relative;width: 108px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 500;line-height: 1.2;color: #8B929E;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">请输入你的“如果”...</div>
+<div data-node="TED01" data-name="Cursor" style="box-sizing: border-box; position: relative;width: 2px;height: 16px;background-color: #D43C33;border-radius: 0.5px;"></div></div></div>
+<div data-node="yKVEi" data-name="Bubble · 我要" style="box-sizing: border-box; position: relative;align-self: stretch;height: 54px;display: flex; flex-direction: row;gap: 10px;align-items: center;"><div data-node="zAAJ8" data-name="Badge 我要" style="box-sizing: border-box; position: relative;width: 40px;height: 40px;display: flex; flex-direction: column;justify-content: center;align-items: center;box-shadow: inset 0 0 0 0.65px rgba(255,0,0,0.329);background-color: rgba(114,29,29,1);border-radius: 27px;"><div data-node="lCNiA" data-name="Label" data-text="我要" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;text-align: center;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;">我要</div></div>
+<div data-node="EAEuc" data-name="Input Slot" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;height: 40px;display: flex; flex-direction: row;gap: 8px;align-items: center;padding: 0px 14px;box-shadow: inset 0 0 0 0.55px rgba(255,255,255,0.169);backdrop-filter: blur(4px) saturate(1.35); -webkit-backdrop-filter: blur(4px) saturate(1.35);background-color: rgba(11,14,20,0.941);border-radius: 12px;"><div data-node="B7QyP" data-name="Placeholder" data-text="请输入你的目标..." style="box-sizing: border-box; position: relative;width: 109px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 500;line-height: 1.2;color: #8B929E;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">请输入你的目标...</div>
+<div data-node="VgsVw" data-name="Cursor" style="box-sizing: border-box; position: relative;width: 2px;height: 16px;background-color: #D43C33;border-radius: 0.5px;"></div>
+<div data-node="G6UHK" data-name="Optional Hint" data-text="选填" style="box-sizing: border-box; position: relative;position: absolute; left: 196px; top: 13px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 700;line-height: 1.4;color: #CF5C5C;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">选填</div></div></div></div></div>
+<div data-node="mN93p" data-name="Interior blush TR" style="box-sizing: border-box; position: relative;position: absolute; left: 130px; top: -70px;width: 300px;height: 128px;opacity: 0.028;border-radius: 50%;background: radial-gradient(circle, rgba(251,60,81,0.157) 0%, rgba(207,36,46,0.141) 45%, rgba(0,0,0,0) 100%);"></div></div>
+<div data-node="x518Mv" data-name="Bottom CTA Bar" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 714px;width: 375px;height: 98px;display: flex; flex-direction: column;gap: 10px;align-items: center;padding: 0px 12px;"></div>
+<div data-node="qZ0iF" data-name="btn4" style="box-sizing: border-box; position: relative;position: absolute; left: 20px; top: 542px;width: 335px;height: 46px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 6px 12px rgba(0,0,0,0.333), 0px 2px 8px rgba(212,60,51,0.157), inset 0 0 0 0.6px rgba(255,255,255,0.227);background-color: #D43C33;border-radius: 23px;"><div data-node="VoHdN" data-name="btn4t" data-text="就这样" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 15px;font-weight: 800;line-height: 1.4;color: rgba(255,255,255,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">就这样</div></div>
+<div data-node="IWrt4" data-name="Horizon arcs" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 40px;display: block;"></div>
+<div data-node="xzG1Q" style="box-sizing: border-box; position: relative;position: absolute; left: 145px; top: 258px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: normal;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;"></div>
+<div data-node="bOLAl" style="box-sizing: border-box; position: relative;position: absolute; left: 85.73px; top: 195.74px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: normal;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;"></div>
+<div data-node="v8irgd" style="box-sizing: border-box; position: relative;position: absolute; left: 106px; top: 204px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: normal;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;"></div>
+<div data-node="Wt3G5" style="box-sizing: border-box; position: relative;position: absolute; left: 147px; top: 226px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: normal;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;"></div>
+<div data-node="qrQqf" style="box-sizing: border-box; position: relative;position: absolute; left: 63.11px; top: 176.54px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: normal;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;"></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"contains":"就这样","to":"07-home.html"}],"prev":"04-create-persona.html","next":"07-home.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+
+<script>// typing prompt: cycle placeholder texts + required "如果" field gate
+(function(){const ph=byText('请输入你的');if(ph){const prompts=['请输入你的\\"如果\\"...','假如有一天...','如果你可以...','如果重新选择...'];let i=0;setInterval(()=>{i=(i+1)%prompts.length;ph.textContent=prompts[i]},2500);ph.style.borderRight='1.5px solid var(--ca)';ph.style.animation='hintPulse 1s step-end infinite'}})();
+// bubble entrance stagger
+document.querySelectorAll('[data-name^=\"Bubble\"]').forEach((b,i)=>{b.style.animationDelay=(i*120)+'ms';b.style.animation='riseIn .5s both cubic-bezier(.22,.9,.3,1)'});
+// required "如果" -> replace with real input, gate the button
+(function(){const slot=byName('Input Slot');if(!slot||!slot.parentElement)return;
+  const isIfSlot=(byText('如果')&&slot.parentElement.querySelector('[data-text]'));
+  const ph=slot.querySelector('[data-text]');
+  if(ph){const inp=document.createElement('input');inp.placeholder=ph.textContent.trim();
+    const cs=getComputedStyle(ph);inp.style.cssText='background:transparent;border:none;outline:none;color:#fff;font-family:inherit;font-size:'+cs.fontSize+';width:100%';ph.replaceWith(inp);
+    inp.dataset.type='如果';
+    // second time: do the "我要" slot too — check it's not already done
+    const allSlots=document.querySelectorAll('[data-name="Input Slot"]');
+    if(allSlots.length>=2&&!allSlots[1].querySelector('input')){
+      const ph2=allSlots[1].querySelector('[data-text]');
+      if(ph2){const inp2=document.createElement('input');inp2.placeholder=ph2.textContent.trim();
+        const cs2=getComputedStyle(ph2);inp2.style.cssText='background:transparent;border:none;outline:none;color:#fff;font-family:inherit;font-size:'+cs2.fontSize+';width:100%';ph2.replaceWith(inp2);inp2.dataset.type='我要';
+      }
+    }
+    // gate the "就这样" button: initially disabled
+    const btn=byTextAny('就这样');if(!btn)return;
+    const btnBox=btn.closest('[data-name]');if(!btnBox)return;
+    function update(){const ok=inp.value.trim().length>0;
+      btnBox.style.opacity=ok?'1':'.35';btnBox.style.pointerEvents=ok?'auto':'none';
+      btnBox.style.filter=ok?'brightness(1)':'grayscale(.6)';btnBox.style.transition='all .3s'};
+    inp.addEventListener('input',update);update();
+    // forward original behavior: only navigate if filled
+    btnBox.addEventListener('click',function(e){if(inp.value.trim().length===0){e.stopPropagation();toast('请先填写你的"如果"','✎');return}});
+  }
+})();
+</script>
+<script>(function(){var bar=document.createElement('div');
+bar.style.cssText='display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(14,14,18,.92);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:40;overflow:hidden';
+bar.innerHTML='<span class="icon-chevron-left" style="font-size:20px;margin-right:4px;color:#fff;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;cursor:pointer;flex:none"></span><span style="font-size:15px;font-weight:600;color:rgba(255,255,255,.8)">创建人格</span>';
+bar.querySelector('.icon-chevron-left').onclick=function(){toPage('04-create-persona.html')};
+var can=document.querySelector('.canvas');if(can)can.insertBefore(bar,can.firstChild);})();</script>
+</body>
+</html>

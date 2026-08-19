@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>亲密度 · IF 平行人格</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Amaranth:wght@400;700&family=Abel&family=Alkalami&family=Akatab:wght@400;700&family=Atma:wght@400;600&family=ABeeZee&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lucide-static@0.544.0/font/lucide.css">
+
+<style>
+/* ========== Design Tokens ========== */
+:root{--ca:#ff553d;--cb:#dc2626;--c0:#07070a;--c1:#0f0d10;--c2:#141416;--c3:#1c1c21;--c4:#2a2a30;--ct:#ffffff;--ct2:rgba(255,255,255,.85);--ct3:rgba(255,255,255,.55);--ct4:rgba(255,255,255,.25);--br:44px;--g1:linear-gradient(135deg,#dc2626,#991b1b);--g2:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.3));--toast-z:99999;--page-z:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--c0);color:#fff;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  background-image:
+    radial-gradient(900px 500px at 12% -10%, rgba(220,38,38,.10), transparent 60%),
+    radial-gradient(700px 480px at 88% 110%, rgba(153,27,27,.08), transparent 60%);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ========== Top Bar ========== */
+.topbar{width:100%;max-width:1120px;display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:13px;color:var(--ct3);flex:none}
+.topbar a{color:var(--ct3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--ct4);background:rgba(255,255,255,.04);transition:.2s}
+.topbar a:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
+.topbar .sp{flex:1}
+.topbar .crumb{color:#fff;font-weight:600}
+.topbar .idx{font-variant-numeric:tabular-nums;color:var(--ct4)}
+
+/* ========== Stage / Device / Viewport ========== */
+.stage{flex:1;width:100%;display:flex;align-items:flex-start;justify-content:center;padding:6px 16px 40px}
+.device{position:relative;transform-origin:top center;transition:transform .25s ease}
+@media (min-width: 768px){
+  .device{padding:14px;border-radius:var(--br);background:linear-gradient(160deg,#1b1b20,#0c0c0f);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 2px rgba(255,255,255,.04)}
+  .device::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#050507;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .viewport{border-radius:32px}
+}
+.viewport{overflow-y:auto;overflow-x:hidden;position:relative;background:#000;scrollbar-width:thin;scrollbar-color:var(--ct4) transparent;scroll-behavior:smooth}
+.viewport::-webkit-scrollbar{width:4px}
+.viewport::-webkit-scrollbar-thumb{background:var(--ct4);border-radius:4px}
+.canvas{position:relative;margin:0 auto;overflow:hidden}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;display:inline-block;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+[class^="icon-"]::before{display:block}
+
+/* ========== Page Transition ========== */
+.page-exit{opacity:0 !important;transform:translateY(-8px) scale(.98) !important;transition:opacity .22s,transform .25s cubic-bezier(.4,0,.3,1) !important;pointer-events:none!important}
+.page-enter{animation:pageIn .48s cubic-bezier(.2,.9,.3,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ========== Entrance & Scroll Animations ========== */
+@keyframes canvasIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.canvas>*{animation:canvasIn .45s cubic-bezier(.2,.8,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.rise{animation:riseIn .55s cubic-bezier(.22,.9,.3,1) both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.float{animation:floatUp 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.75;filter:brightness(1)}50%{opacity:1;filter:brightness(1.4)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes hintPulse{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.orbit-spin{animation:orbit 8s linear infinite}
+
+/* ========== Interactions ========== */
+.u-click{cursor:pointer;position:relative;overflow:hidden;transition:filter .2s ease,transform .18s ease,opacity .18s ease}
+.u-click:hover{filter:brightness(1.22)}
+.u-click:active{transform:scale(.95)}
+.u-click:active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:rippleIn .35s ease-out}
+@keyframes rippleIn{from{opacity:1;transform:scale(0);border-radius:50%}to{opacity:0;transform:scale(2.5);border-radius:inherit}}
+.chip-on{outline:1.5px solid rgba(255,85,61,.85);outline-offset:-1.5px;background:rgba(255,85,61,.18)!important}
+.tab-active{background:rgba(255,85,61,.16)!important;color:var(--ca)!important}
+.tab-active .msr,.tab-active [class^="icon-"]{color:var(--ca)!important}
+
+/* ========== Button Enhancements ========== */
+[data-name*="btn" i],[data-name*="CTA" i],[data-name*="Button" i],[data-name*="卡" i],[data-name*="chip" i]{cursor:pointer;transition:filter .18s ease,transform .12s ease}
+[data-name*="btn" i]:hover,[data-name*="CTA" i]:hover{filter:brightness(1.25)!important}
+[data-name*="btn" i]:active,[data-name*="CTA" i]:active{transform:scale(.94)!important}
+[data-name*="chip" i]:active{transform:scale(.95)!important}
+[data-name="Send Button"]:hover{filter:brightness(1.35)!important}
+[data-name="Send Button"]:active{transform:scale(.85)!important}
+
+/* ========== Toast ========== */
+.toast{position:fixed;left:50%;bottom:56px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,24,.92);border:1px solid var(--ct4);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,.9,.3,1);z-index:var(--toast-z);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon{color:var(--ca);margin-right:6px}
+
+/* ========== Responsive ========== */
+@media (max-width: 767px){
+  .topbar{display:none}
+  .stage{padding:0}
+  .viewport{height:100dvh !important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::after,*::before{animation-duration:0s!important;transition-duration:0s!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html">&#8592; 全部页面</a>
+  <span class="idx">10 / 16</span>
+  <span class="crumb">亲密度</span>
+  <span class="sp"></span>
+  <a href="07-home.html">&#8592; 上一页</a>
+  <a href="ip-settings.html">下一页 &#8594;</a>
+</div>
+<div class="stage">
+  <div class="device">
+    <div class="viewport" style="width:375px;height:812px">
+      <div class="canvas" style="width:375px;min-height:812px"><div data-node="MfH0V" data-name="亲密度(点击IP头像进入）" style="box-sizing: border-box; position: relative;width: 375px;height: 812px;display: flex; flex-direction: column;gap: 12px;padding: 0px 12px 12px 12px;background-color: #000000;overflow: hidden;"><div data-node="QVkr7" data-name="Status Bar" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 0px;width: 375px;height: 32px;display: flex; flex-direction: row;justify-content: space-between;align-items: center;padding: 5px 12px;"><div data-node="B1U3p" data-name="Time" data-text="16:36" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 600;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">16:36</div>
+<div data-node="L926F6" data-name="Status Icons" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="lUzkG" data-name="cell" data-icon="signal" class="icon-signal" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="gtNxt" data-name="net" data-text="5G" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 700;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">5G</div>
+<i data-node="EuvfO" data-name="wifi" data-icon="wifi" class="icon-wifi" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; line-height: 1; flex: none;"></i>
+<i data-node="ZIwFx" data-name="batt" data-icon="battery-full" class="icon-battery-full" style="box-sizing: border-box; position: relative;width: 20px;height: 20px;width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px; line-height: 1; flex: none;"></i></div></div>
+<div data-node="dc5U9" data-name="Top" style="box-sizing: border-box; position: relative;position: absolute; left: 12px; top: 32px;width: 351px;height: 56px;display: flex; flex-direction: row;justify-content: center;align-items: center;"><i data-node="wHwAY" data-name="Back" data-icon="chevron-left" class="icon-chevron-left" style="box-sizing: border-box; position: relative;position: absolute; left: 0px; top: 17px;width: 22px;height: 22px;width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 22px; line-height: 1; flex: none;"></i>
+<div data-node="zBG9Z" data-name="Title" data-text="亲密度" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 16px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">亲密度</div></div>
+<div data-node="tWBBf" data-name="Body" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 12px;padding: 104px 0px 0px 0px;"><div data-node="rXQSH" data-name="Relation Card" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 14px;justify-content: space-between;align-items: center;padding: 16px 16px 14px 16px;box-shadow: 0px 10px 20px rgba(0,0,0,0.4), 0px 0px 22px rgba(255,59,92,0.078), inset 0 0 0 [object Object]px rgba(255,59,92,0.239);background: linear-gradient(260deg, #25272C 0%, #1D1F24 58%, #17191D 100%);border-radius: 22px;"><div data-node="VtUJa" data-name="Me" style="box-sizing: border-box; position: relative;width: 120px;display: flex; flex-direction: column;gap: 8px;align-items: center;"><div data-node="aKaMZ" data-name="Avatar" style="box-sizing: border-box; position: relative;width: 68px;height: 68px;border-radius: 50%;background: url(assets/unsplash-1587345136683-245016012e86.jpg) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: 0px 4px 10px rgba(0,0,0,0.4), 0px 0px 6px rgba(239,68,68,0.133), inset 0 0 0 1.8px rgba(255,255,255,0.4);"></div>
+<div data-node="ueAa0" data-text="我" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">我</div></div>
+<div data-node="wMxD7" data-name="Mid" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 8px;align-items: center;"><i data-node="UvYEt" data-icon="activity" class="icon-activity" style="box-sizing: border-box; position: relative;width: 22px;height: 22px;width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #FF3B5C; font-size: 22px; line-height: 1; flex: none;"></i>
+<div data-node="Um6Me" data-name="Level row" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 4px;justify-content: center;align-items: center;"><div data-node="M6dd4" data-name="lvlA" data-text="Lv.8" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 17px;font-weight: 900;line-height: 1.4;color: #FFFFFF;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">Lv.8</div>
+<div data-node="e9qBr" data-name="lvlB" data-text="/ 40" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 600;line-height: 1.4;color: #999999;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;"> / 40</div></div>
+<div data-node="QSEjT" data-name="Prog" style="box-sizing: border-box; position: relative;width: 120px;height: 6px;display: flex; flex-direction: row;gap: 6px;align-items: center;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.8);backdrop-filter: blur(4px) saturate(1.35); -webkit-backdrop-filter: blur(4px) saturate(1.35);background-color: #1C1012;border-radius: 999px;"><div data-node="YS88d" data-name="Fill" style="box-sizing: border-box; position: relative;width: 56px;height: 6px;box-shadow: 0px 1px 6px rgba(212,60,51,0.251);background-color: #D43C33;border-radius: 999px;"></div></div>
+<div data-node="YkNQG" data-name="Intimacy foot" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 6px;justify-content: center;align-items: center;"><div data-node="Ybefw" data-name="footT" data-text="亲密度 2,380 / 5,000" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 7px;font-weight: 600;line-height: 1.4;color: #999999;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">亲密度 2,380 / 5,000</div></div></div>
+<div data-node="gZX3u" data-name="Her" style="box-sizing: border-box; position: relative;width: 120px;display: flex; flex-direction: column;gap: 8px;align-items: center;"><div data-node="dTvYg" data-name="Avatar" style="box-sizing: border-box; position: relative;width: 68px;height: 68px;border-radius: 50%;background: url(assets/generated-1777201503182.png) center / cover no-repeat, linear-gradient(150deg, rgba(255,255,255,.12), rgba(0,0,0,.3)), #1c1c21;box-shadow: 0px 4px 10px rgba(0,0,0,0.4), 0px 0px 6px rgba(239,68,68,0.133), inset 0 0 0 1.8px rgba(255,255,255,0.4);"></div>
+<div data-node="vs69L" data-text="互补人格W" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 800;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">互补人格W</div></div></div>
+<div data-node="g6vYQu" data-name="成就解锁" style="box-sizing: border-box; position: relative;align-self: stretch;height: 136px;display: flex; flex-direction: column;gap: 10px;"><div data-node="EI6AL" data-text="已解锁成就" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;letter-spacing: 2.2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">已解锁成就</div>
+<div data-node="eLE5I" data-name="Row" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;gap: 10px;overflow: hidden;"><div data-node="l68MI" data-name="成就卡·心动初见" style="box-sizing: border-box; position: relative;width: 160px;height: 94px;display: flex; flex-direction: column;gap: 9px;padding: 12px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #40454E;background: linear-gradient(260deg, #2D3036 0%, #24272D 50%, #1E2127 100%);border-radius: 16px;overflow: hidden;"><div data-node="d5GVGx" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="n8Pr7" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="Ff8KY" data-icon="sparkles" class="icon-sparkles" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: rgba(184,192,204,1); font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="R059s" data-text="心动初见" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 950;line-height: 1.4;color: rgba(255,254,254,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">心动初见</div></div>
+<div data-node="v73ko" data-name="Status Tag A" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 3px 7px;box-shadow: inset 0 0 0 0.8px rgba(212,60,51,1);background-color: #32363E;border-radius: 999px;"><div data-node="xxyfa" data-name="Tag Text A" data-text="限定" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 8px;font-weight: 800;line-height: 1.4;color: rgba(212,60,51,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">限定</div></div></div>
+<div data-node="Xv1Lu" data-text="第一次互相说早安" style="box-sizing: border-box; position: relative;width: 132px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 600;line-height: 1.4;color: #D6DCE6;white-space: pre-wrap; word-break: break-word; margin: 0;">第一次互相说早安</div>
+<div data-node="QCACy" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="x0mFfd" data-text="已完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 900;line-height: 1.4;color: #F4F7FB;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">已完成</div>
+<div data-node="pdyDn" style="box-sizing: border-box; position: relative;width: 64px;height: 6px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(255,255,255,0.251);background-color: rgba(255,255,255,0.09);border-radius: 999px;"><div data-node="Dqa47" style="box-sizing: border-box; position: relative;width: 64px;height: 6px;background-color: #D43C33;border-radius: 999px;"></div></div></div></div>
+<div data-node="oa9cU" data-name="成就卡·一起听歌" style="box-sizing: border-box; position: relative;width: 160px;height: 94px;display: flex; flex-direction: column;gap: 9px;padding: 12px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #40454E;background: linear-gradient(260deg, #2D3036 0%, #24272D 50%, #1E2127 100%);border-radius: 16px;overflow: hidden;"><div data-node="yNEA8" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="pS3Vn" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 8px;align-items: center;"><i data-node="xiPyo" data-icon="music" class="icon-music" style="box-sizing: border-box; position: relative;width: 18px;height: 18px;width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #B8C0CC; font-size: 18px; line-height: 1; flex: none;"></i>
+<div data-node="qBSSI" data-text="一起听歌" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 950;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">一起听歌</div></div>
+<div data-node="CoLhi" data-name="Status Tag B" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 3px 7px;box-shadow: inset 0 0 0 0.8px rgba(212,60,51,1);background-color: #32363E;border-radius: 999px;"><div data-node="K2AwUm" data-name="Tag Text B" data-text="进行中" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 8px;font-weight: 800;line-height: 1.4;color: rgba(212,60,51,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">进行中</div></div></div>
+<div data-node="r3bFg" data-text="分享 3 首歌给对方" style="box-sizing: border-box; position: relative;width: 132px;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 9px;font-weight: 600;line-height: 1.4;color: #D6DCE6;white-space: pre-wrap; word-break: break-word; margin: 0;">分享 3 首歌给对方</div>
+<div data-node="HZtwK" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="puSO9" data-text="2/3" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 900;line-height: 1.4;color: #F4F7FB;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">2/3</div>
+<div data-node="C9AnY9" style="box-sizing: border-box; position: relative;width: 64px;height: 6px;display: flex; flex-direction: row;box-shadow: inset 0 0 0 1px rgba(212,60,51,0.6);background-color: rgba(212,60,51,0.094);border-radius: 999px;"><div data-node="m60voA" style="box-sizing: border-box; position: relative;width: 43px;height: 6px;background-color: #D43C33;border-radius: 999px;"></div></div></div></div></div></div>
+<div data-node="zfEj2" data-name="提升亲密度任务" style="box-sizing: border-box; position: relative;align-self: stretch;height: 338px;display: flex; flex-direction: column;gap: 10px;"><div data-node="A6XdGh" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: row;justify-content: space-between;align-items: center;"><div data-node="TzPCI" data-text="提升亲密度任务" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 900;letter-spacing: 2.2px;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">提升亲密度任务</div>
+<div data-node="A3f2t9" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;padding: 6px 9px;box-shadow: 0px 2px 6px rgba(0,0,0,0.251), inset 0 0 0 0.8px rgba(212,60,51,1);border-radius: 999px;"><div data-node="LWrng" data-text="今日 +60" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 8px;font-weight: 900;line-height: 1.4;color: rgba(212,60,51,1);white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">今日 +60</div></div></div>
+<div data-node="uOe2U" data-name="List" style="box-sizing: border-box; position: relative;align-self: stretch;display: flex; flex-direction: column;gap: 10px;"><div data-node="ZKlu8" data-name="任务·发起一次对话" style="box-sizing: border-box; position: relative;align-self: stretch;height: 62px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 14px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #2C333E;background-color: #181c23;border-radius: 18px;"><div data-node="eeMjT" data-name="leadZ" style="box-sizing: border-box; position: relative;width: 28px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 0px 12px rgba(220,38,38,0.251), inset 0 0 0 1px rgba(212,60,51,1);background-color: #1C1419;border-radius: 19px;"><i data-node="d24eiQ" data-name="icZ" data-icon="message-circle" class="icon-message-circle" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: rgba(212,60,51,1); font-size: 16px; line-height: 1; flex: none;"></i></div>
+<div data-node="W4HEg" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 4px;"><div data-node="k27qRF" data-text="发起一次对话" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 700;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">发起一次对话</div>
+<div data-node="k8dndP" data-text="一句‘在吗’也算。" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #AEB7C4;white-space: pre-wrap; word-break: break-word; margin: 0;">一句‘在吗’也算。</div></div>
+<div data-node="oH0mm" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="G36mB" data-text="+10" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">+10</div>
+<i data-node="ftYVU" data-name="hz" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 14px;height: 14px;width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: #E85D5D; font-size: 14px; line-height: 1; flex: none;"></i>
+<div data-node="lL53w" style="box-sizing: border-box; position: relative;width: 50px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 12px;box-shadow: 0px 6px 14px rgba(140,32,27,0.4), inset 0 0 0 1.1px #E65B53;background-color: #D43C33;border-radius: 999px;"><div data-node="i8toQM" data-text="去完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 950;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">去完成</div></div></div></div>
+<div data-node="i64KF" data-name="任务·分享今日心情" style="box-sizing: border-box; position: relative;align-self: stretch;height: 62px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 14px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #2C333E;background-color: #181c23;border-radius: 18px;"><div data-node="q334h" data-name="leadI" style="box-sizing: border-box; position: relative;width: 28px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 0px 12px rgba(220,38,38,0.251), inset 0 0 0 1px rgba(212,60,51,1);background-color: #1C1419;border-radius: 19px;"><i data-node="G3Sz21" data-name="icI" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: rgba(212,60,51,1); font-size: 16px; line-height: 1; flex: none;"></i></div>
+<div data-node="LrvBv" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 4px;"><div data-node="iqRn3" data-text="分享今日心情" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 700;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">分享今日心情</div>
+<div data-node="Ux6bh" data-text="选一个表情 + 一句话" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #AEB7C4;white-space: pre-wrap; word-break: break-word; margin: 0;">选一个表情 + 一句话</div></div>
+<div data-node="S6Y0Mx" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="SCDQW" data-text="+20" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">+20</div>
+<i data-node="xkcC5" data-name="hI" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 14px;height: 14px;width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: #E85D5D; font-size: 14px; line-height: 1; flex: none;"></i>
+<div data-node="QFD2j" style="box-sizing: border-box; position: relative;width: 50px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 12px;box-shadow: 0px 6px 14px rgba(140,32,27,0.4), inset 0 0 0 1.1px #E65B53;background-color: #D43C33;border-radius: 999px;"><div data-node="ABdBM" data-text="去完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 950;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">去完成</div></div></div></div>
+<div data-node="ySEXu" data-name="任务·完成一次共创" style="box-sizing: border-box; position: relative;align-self: stretch;height: 62px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 14px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #2C333E;background-color: #181c23;border-radius: 18px;"><div data-node="sgZ4W" data-name="leadY" style="box-sizing: border-box; position: relative;width: 28px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 0px 12px rgba(220,38,38,0.251), inset 0 0 0 1px rgba(212,60,51,1);background-color: #1C1419;border-radius: 19px;"><i data-node="nJvuM" data-name="icY" data-icon="pen-line" class="icon-pen-line" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: rgba(212,60,51,1); font-size: 16px; line-height: 1; flex: none;"></i></div>
+<div data-node="gsPlt" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 4px;"><div data-node="Nmm7o" data-text="完成二次共创" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 700;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">完成二次共创</div>
+<div data-node="OyN8X" data-text="一起写一段设定 / 计划 / 备忘" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #AEB7C4;white-space: pre-wrap; word-break: break-word; margin: 0;">一起写一段设定 / 计划 / 备忘</div></div>
+<div data-node="A359zW" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="MCaBM" data-text="+30" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">+30</div>
+<i data-node="SdFoD" data-name="hY" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 14px;height: 14px;width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: #E85D5D; font-size: 14px; line-height: 1; flex: none;"></i>
+<div data-node="x3JOPI" style="box-sizing: border-box; position: relative;width: 50px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 12px;box-shadow: 0px 6px 14px rgba(140,32,27,0.4), inset 0 0 0 1.1px #E65B53;background-color: #D43C33;border-radius: 999px;"><div data-node="W3HTi" data-text="去完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 950;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">去完成</div></div></div></div>
+<div data-node="a3xGDT" data-name="任务·完成一次共创" style="box-sizing: border-box; position: relative;align-self: stretch;height: 62px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 14px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #2C333E;background-color: #181c23;border-radius: 18px;"><div data-node="Q6LwWL" data-name="leadA" style="box-sizing: border-box; position: relative;width: 28px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 0px 12px rgba(220,38,38,0.251), inset 0 0 0 1px rgba(212,60,51,1);background-color: #1C1419;border-radius: 19px;"><i data-node="vgSHh" data-name="icA" data-icon="feather" class="icon-feather" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: rgba(212,60,51,1); font-size: 16px; line-height: 1; flex: none;"></i></div>
+<div data-node="G1AAb" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 4px;"><div data-node="emK4f" data-text="完成一次共创" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 700;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">完成一次共创</div>
+<div data-node="FGGUF" data-text="一起写一段设定 / 计划 / 备忘" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #AEB7C4;white-space: pre-wrap; word-break: break-word; margin: 0;">一起写一段设定 / 计划 / 备忘</div></div>
+<div data-node="s6qXC" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="V4Pl5B" data-text="+30" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">+30</div>
+<i data-node="yWw4N" data-name="hA" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 14px;height: 14px;width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: #E85D5D; font-size: 14px; line-height: 1; flex: none;"></i>
+<div data-node="k3DXv" style="box-sizing: border-box; position: relative;width: 50px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 12px;box-shadow: 0px 6px 14px rgba(140,32,27,0.4), inset 0 0 0 1.1px #E65B53;background-color: #D43C33;border-radius: 999px;"><div data-node="UCbmY" data-text="去完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 950;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">去完成</div></div></div></div>
+<div data-node="iwc9e" data-name="任务·已完成" style="box-sizing: border-box; position: relative;align-self: stretch;height: 62px;display: flex; flex-direction: row;gap: 12px;justify-content: space-between;align-items: center;padding: 14px;box-shadow: 0px 8px 16px rgba(0,0,0,0.333), inset 0 0 0 1px #3A4250;background-color: #181C23;border-radius: 18px;"><div data-node="khObj" data-name="leadC" style="box-sizing: border-box; position: relative;width: 28px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;box-shadow: 0px 0px 10px rgba(0,0,0,0.333), inset 0 0 0 1px rgba(74,82,96,0.333);background-color: #1A1E26;border-radius: 19px;"><i data-node="l5QOwA" data-name="icC" data-icon="calendar-check" class="icon-calendar-check" style="box-sizing: border-box; position: relative;width: 16px;height: 16px;width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: #8B96A8; font-size: 16px; line-height: 1; flex: none;"></i></div>
+<div data-node="J4YY5" style="box-sizing: border-box; position: relative;flex: 1 1 0; min-width: 0;display: flex; flex-direction: column;gap: 4px;"><div data-node="kc3Q1" data-text="今日任务已完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 13px;font-weight: 700;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;">今日任务已完成</div>
+<div data-node="jGlwS" data-text="保持节奏，明天继续。" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 11px;font-weight: 500;line-height: 1.4;color: #AEB7C4;white-space: pre-wrap; word-break: break-word; margin: 0;">保持节奏，明天继续。</div></div>
+<div data-node="kSSF2" style="box-sizing: border-box; position: relative;display: flex; flex-direction: row;gap: 6px;align-items: center;"><div data-node="a3pR6" data-name="Completed Score" data-text="+30" style="box-sizing: border-box; position: relative;font-family: 'IBM Plex Mono', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 12px;font-weight: 900;line-height: 1.4;color: #ffffff;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">+30</div>
+<i data-node="CAjMS" data-name="hK" data-icon="heart" class="icon-heart" style="box-sizing: border-box; position: relative;width: 12px;height: 12px;width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; color: #878F9F; font-size: 12px; line-height: 1; flex: none;"></i>
+<div data-node="LtRE6" style="box-sizing: border-box; position: relative;width: 50px;height: 28px;display: flex; flex-direction: row;justify-content: center;align-items: center;padding: 12px;box-shadow: 0px 2px 8px rgba(0,0,0,0.267), inset 0 0 0 1px #4A5260;background-color: #242933;border-radius: 999px;"><div data-node="p1S54D" data-text="已完成" style="box-sizing: border-box; position: relative;font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;font-size: 10px;font-weight: 700;line-height: 1.4;color: #8B96A8;white-space: pre-wrap; word-break: break-word; margin: 0;flex: none;">已完成</div></div></div></div></div></div></div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const PAGE = {"rules":[{"name":"Back","to":"07-home.html"},{"text":"去完成","to":"persona-chat.html"}],"prev":"07-home.html","next":"ip-settings.html"};
+const SLUG = location.pathname.split('/').pop().replace(/.html$/,'')||'index';
+function q1(pred){const all=[...document.querySelectorAll('[data-text],[data-name],[data-icon]')];return all.find(pred)}
+function byText(t){return q1(el=>(el.dataset.text||'').trim()===t)}
+function byTextAny(t){return q1(el=>((el.dataset.text||'').includes(t)))}
+function byName(n){return q1(el=>(el.dataset.name||'')===n)}
+function byIcon(n){return q1(el=>(el.dataset.icon||'')===n)}
+function toPage(to){document.querySelector('.canvas').classList.add('page-exit');setTimeout(()=>location.href=to,230)}
+function clickable(el,to){if(!el)return;let t=el;for(let i=0;i<4&&t;i++){const box=t.closest('[data-name]')||t;if(box){t=box;break}t=t.parentElement}
+  t.classList.add('u-click');t.addEventListener('click',e=>{e.stopPropagation();if(to)toPage(to)})}
+function toast(msg,icon){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}
+  t.innerHTML=(icon?'<span class="toast-icon">'+icon+'</span>':'')+msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+// fit device to window
+function fit(){const d=document.querySelector('.device');if(!d)return;const vp=document.querySelector('.viewport');
+  if(innerWidth<768){const s=Math.min(1,innerWidth/vp.offsetWidth);d.style.transform=s>=1?'none':'scale('+s+')';d.style.transformOrigin='top center';return}
+  const w=vp.offsetWidth+28,h=vp.offsetHeight+28;const s=Math.min(1,(innerHeight-88)/h,(innerWidth-24)/w);d.style.transform=s>=1?'none':'scale('+s+')'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));fit();
+// page enter animation
+document.querySelector('.canvas').classList.add('page-enter');
+setTimeout(()=>document.querySelector('.canvas').classList.remove('page-enter'),500);
+// keyboard nav
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&PAGE.next)toPage(PAGE.next);if(e.key==='ArrowLeft'&&PAGE.prev)toPage(PAGE.prev)});
+// swipe gesture
+let sx=0;addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>80&&Math.abs(dx)<innerWidth/2){if(dx<0&&PAGE.next)toPage(PAGE.next);if(dx>0&&PAGE.prev)toPage(PAGE.prev)}});
+// tab bar sync (highlight current page in bottom nav)
+const curTab={index:{'07-home':'星球','messages':'消息','messages-filter':'消息','intimacy':'我的','group-chat':'广场','persona-chat':'广场'}}[SLUG];
+if(curTab){const tab=byText(curTab);if(tab){const btn=tab.closest('[data-text]')||tab.parentElement;if(btn)btn.classList.add('tab-active')}}
+// generic nav rules
+(PAGE.rules||[]).forEach(r=>{let el=null;if(r.text)el=byText(r.text);if(!el&&r.contains)el=byTextAny(r.contains);if(!el&&r.icon)el=byIcon(r.icon);if(!el&&r.name)el=byName(r.name);if(el){
+  if(r.to)clickable(el,r.to);else if(r.act==='toast'){el.classList.add('u-click');el.addEventListener('click',()=>toast(r.msg||'敬请期待','●'))}
+}});
+// toggle groups (segmented / chips)
+document.querySelectorAll('[data-toggle-group]').forEach(g=>{g.querySelectorAll(':scope [data-toggle]').forEach(c=>{c.classList.add('u-click');c.addEventListener('click',()=>{if(g.dataset.toggleGroup==='multi'){c.classList.toggle('chip-on')}else{g.querySelectorAll('.chip-on').forEach(x=>x.classList.remove('chip-on'));c.classList.add('chip-on')}})})});
+</script>
+
+<script>
+// progress fill animation + staggered achievements + heart pulse
+(function(){const f=byName('Fill');if(f){f.style.transition='width .8s cubic-bezier(.22,.9,.3,1)';f.style.width=f.dataset.name==='Fill'?'47%':'100%'}})();
+document.querySelectorAll('[data-text="去完成"],[data-text="已完成"]').forEach((b,i)=>{b.closest('[data-name]').classList.add('u-click');b.style.animationDelay=(i*120)+'ms';b.style.animation='riseIn .5s both cubic-bezier(.22,.9,.3,1)'});
+document.querySelectorAll('[data-icon="heart"]').forEach(h=>{h.closest('[data-name]')?.classList.add('pulse')});
+document.querySelectorAll('[data-name^="成就"]').forEach((c,i)=>{c.style.animationDelay=(i*150)+'ms';c.style.animation='riseIn .55s both cubic-bezier(.22,.9,.3,1)'});
+</script>
+<script>(function(){var bar=document.createElement('div');
+bar.style.cssText='display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(14,14,18,.92);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:40;overflow:hidden';
+bar.innerHTML='<span class="icon-chevron-left" style="font-size:20px;margin-right:4px;color:#fff;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;cursor:pointer;flex:none"></span><span style="font-size:15px;font-weight:600;color:rgba(255,255,255,.8)">星海首页</span>';
+bar.querySelector('.icon-chevron-left').onclick=function(){toPage('07-home.html')};
+var can=document.querySelector('.canvas');if(can)can.insertBefore(bar,can.firstChild);})();</script>
+</body>
+</html>
